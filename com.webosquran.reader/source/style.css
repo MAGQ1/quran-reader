@@ -19,10 +19,15 @@
     font-size: 14px;
     color: #777;
 }
+/* The Arabic is stored letter by letter in reading order; the device cannot order
+   Arabic itself, so bidi-override + rtl makes it draw right to left.
+   Do NOT add letter-spacing: the font already overlaps joined letters by design,
+   and a negative value squeezed letters that are not joined. */
 .q-arabic {
     font-family: "Quran Shaped", serif;
     font-size: 30px;
     direction: rtl;
+    unicode-bidi: bidi-override;
 }
 
 /* ---- Reader ---- */
@@ -35,6 +40,8 @@
 .q-bismillah {
     font-family: "Quran Shaped", serif;
     font-size: 34px;
+    direction: rtl;
+    unicode-bidi: bidi-override;
     text-align: center;
     padding: 12px 0 20px 0;
 }
@@ -45,11 +52,15 @@
 .q-ar {
     font-family: "Quran Shaped", serif;
     font-size: 36px;
-    line-height: 1.9;
+    line-height: 2.1;
     direction: rtl;
+    unicode-bidi: bidi-override;
     text-align: right;
 }
+/* The verse-number marker reads left to right again (so 12 stays 12). */
 .q-ar-num {
+    direction: ltr;
+    unicode-bidi: bidi-override;
     font-size: 26px;
     color: #7a6a3a;
 }

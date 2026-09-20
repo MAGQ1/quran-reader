@@ -100,7 +100,7 @@ enyo.kind({
             html.push(
                 '<div class="q-ayah" id="ayah-' + n + '">' +
                 '<div class="q-ar"' + font + '>' + self.escapeHtml(text) +
-                ' <span class="q-ar-num">﴿' + (self.numbers.id === "regular" ? n : self.arabicDigits(n)) + '﴾</span></div>' +
+                ' <span class="q-ar-num">﴾' + (self.numbers.id === "regular" ? n : self.arabicDigits(n)) + '﴿</span></div>' +
                 '<div class="q-en"><span class="q-en-num">' + n + '.</span> ' + self.escapeHtml(english[i] || "") + '</div>' +
                 '</div>'
             );
