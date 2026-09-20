@@ -118,6 +118,12 @@ enyo.kind({
     },
 
     scrollToAyah: function (n) {
+        // Verse 1 means "the start of the surah": show it from the very top, so the
+        // bismillah heading above the first verse is visible too.
+        if (n <= 1) {
+            this.$.scroller.setScrollTop(0);
+            return;
+        }
         var node = this.$.body.hasNode();
         var el = node && node.querySelector("#ayah-" + n);
         this.$.scroller.setScrollTop(el ? el.offsetTop : 0);
