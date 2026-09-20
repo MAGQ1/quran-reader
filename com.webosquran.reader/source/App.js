@@ -31,6 +31,13 @@ enyo.kind({
             {name: "home", kind: "QuranHome", onOpenSurah: "openSurah"},
             {name: "reader", kind: "QuranReader", onBack: "showHome", onProgress: "saveProgress"}
         ]},
+        {name: "fontDialog", kind: "ModalDialog", caption: "One more step", components: [
+            {allowHtml: true, style: "padding: 8px 0;", content:
+                "The Arabic font is not active yet, so Arabic text shows as empty boxes.<br><br>" +
+                "Please perform a <b>full restart</b> or a <b>Luna restart</b>.<br><br>" +
+                "This only happens after installing or updating the app."},
+            {kind: "Button", caption: "OK", onclick: "closeFontDialog"}
+        ]},
         {name: "about", kind: "ModalDialog", caption: "About Quran Reader", components: [
             {allowHtml: true, style: "padding: 8px 0;", content:
                 "Arabic text: Tanzil Project (tanzil.net), Uthmani script.<br>" +
@@ -54,6 +61,20 @@ enyo.kind({
         this.$.reader.setSources(this.script, this.translation, this.numbers);
         this.$.home.setResume(this.position);
         this.updateMenuChecks();
+    },
+
+    // After the first draw, check that the Arabic font is really usable. A new font
+    // is only picked up after a restart, so right after an install it may not be.
+    rendered: function () {
+        this.inherited(arguments);
+        var self = this;
+        setTimeout(function () {
+            if (!QuranFont.isLoaded()) { self.$.fontDialog.openAtCenter(); }
+        }, 800);
+    },
+
+    closeFontDialog: function () {
+        this.$.fontDialog.close();
     },
 
     // ---- navigation ----
