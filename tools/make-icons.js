@@ -30,10 +30,29 @@ var COVER_L = [[0.500, 0.590], [0.300, 0.500], [0.120, 0.520], [0.120, 0.845], [
 var PAGE_L = [[0.500, 0.605], [0.305, 0.520], [0.150, 0.540], [0.150, 0.800], [0.305, 0.790], [0.500, 0.880]];
 var COVER_R = mirror(COVER_L), PAGE_R = mirror(PAGE_L);
 
-// Faint lines of text on the pages.
-var LINES = [];
-[0.60, 0.68, 0.76].forEach(function (t, i) {
-    LINES.push([[0.195, 0.555 + (t - 0.60) * 0.95 + 0.020 * 0], [0.455, 0.585 + (t - 0.60) * 1.20]]);
+// Faint lines of text on the pages. Each line runs between the page's top and bottom edges
+// at a fixed fraction of the way down, so it bends exactly the way the page bends.
+var PAGE_TOP = [[0.150, 0.540], [0.305, 0.520], [0.500, 0.605]];
+var PAGE_BOTTOM = [[0.150, 0.800], [0.305, 0.790], [0.500, 0.880]];
+
+function yOnEdge(edge, x) {   // height of a polyline edge at a given x
+    for (var i = 0; i < edge.length - 1; i++) {
+        if (x >= edge[i][0] && x <= edge[i + 1][0]) {
+            var t = (x - edge[i][0]) / (edge[i + 1][0] - edge[i][0]);
+            return edge[i][1] + (edge[i + 1][1] - edge[i][1]) * t;
+        }
+    }
+    return edge[edge.length - 1][1];
+}
+
+var LINES = [];   // short straight pieces; together they make each bent line
+[0.25, 0.47, 0.69].forEach(function (frac) {
+    var xs = [0.195, 0.305, 0.455];   // start, the crest of the page, end
+    for (var i = 0; i < xs.length - 1; i++) {
+        var y0 = yOnEdge(PAGE_TOP, xs[i]), y1 = yOnEdge(PAGE_TOP, xs[i + 1]);
+        var b0 = yOnEdge(PAGE_BOTTOM, xs[i]), b1 = yOnEdge(PAGE_BOTTOM, xs[i + 1]);
+        LINES.push([[xs[i], y0 + (b0 - y0) * frac], [xs[i + 1], y1 + (b1 - y1) * frac]]);
+    }
 });
 
 var STAR = [];
