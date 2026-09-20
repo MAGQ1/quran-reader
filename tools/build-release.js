@@ -16,7 +16,7 @@ var cp = require("child_process");
 var ipk = require("./ipk.js");
 
 var root = path.join(__dirname, "..");
-var appDir = path.join(root, "com.webosquran.reader");
+var appDir = path.join(root, "com.magq.quranreader");
 var outDir = path.join(root, "dist");
 var appinfo = JSON.parse(fs.readFileSync(path.join(appDir, "appinfo.json"), "utf8"));
 

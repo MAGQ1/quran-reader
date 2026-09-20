@@ -20,7 +20,7 @@ for search. The shaped copy has the SAME number of words in the SAME order, so
 word N of the shaped text is word N of the plain text (handy for highlighting
 search hits).
 
-OUTPUT (inside com.webosquran.reader/)
+OUTPUT (inside com.magq.quranreader/)
   fonts/QuranShaped.ttf          the custom font (install it on the device)
   data/uthmani-shaped/NNN.json   shaped verses, one file per surah
   data/shaped-extra.json         shaped surah names + bismillah
@@ -45,7 +45,7 @@ from fontTools.subset import Options, Subsetter
 from fontTools.ttLib import TTFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-APP = os.path.join(HERE, "..", "com.webosquran.reader")
+APP = os.path.join(HERE, "..", "com.magq.quranreader")
 SOURCE_FONT = os.path.join(APP, "fonts", "AmiriQuran-Regular.ttf")
 FAMILY = "Quran Shaped"
 PUA_START = 0xE000

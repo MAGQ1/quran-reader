@@ -11,7 +11,7 @@ var https = require('https');
 var fs = require('fs');
 var path = require('path');
 
-var OUT = path.join(__dirname, '..', 'com.webosquran.reader', 'data');
+var OUT = path.join(__dirname, '..', 'com.magq.quranreader', 'data');
 
 // Each entry becomes data/<folder>/001.json ... 114.json
 var EDITIONS = [

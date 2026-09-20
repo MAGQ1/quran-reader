@@ -33,7 +33,7 @@ enyo.kind({
 
     create: function () {
         this.inherited(arguments);
-        this.appId = (enyo.fetchAppId && enyo.fetchAppId()) || "com.webosquran.reader";
+        this.appId = (enyo.fetchAppId && enyo.fetchAppId()) || "com.magq.quranreader";
         this.kindId = this.appId + ".surah:1";
     },
 

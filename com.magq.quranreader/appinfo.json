@@ -1,7 +1,7 @@
 {
-  "id": "com.webosquran.reader",
+  "id": "com.magq.quranreader",
   "version": "0.1.0",
-  "vendor": "Personal",
+  "vendor": "MAGQ",
   "type": "web",
   "main": "index.html",
   "title": "Quran Reader",
@@ -12,12 +12,12 @@
   "universalSearch": {
     "dbsearch": {
       "displayName": "Quran",
-      "url": "com.webosquran.reader",
+      "url": "com.magq.quranreader",
       "launchParam": "surah",
       "launchParamDbField": "id",
       "displayFields": ["display", "secondary", "blank", "id"],
       "dbQuery": {
-        "from": "com.webosquran.reader.surah:1",
+        "from": "com.magq.quranreader.surah:1",
         "where": [{"prop": "search", "op": "?", "val": "", "collate": "primary"}],
         "limit": 20
       }

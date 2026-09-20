@@ -20,7 +20,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$font = Join-Path $PSScriptRoot "..\com.webosquran.reader\fonts\QuranShaped.ttf"
+$font = Join-Path $PSScriptRoot "..\com.magq.quranreader\fonts\QuranShaped.ttf"
 if (-not (Test-Path $font)) {
     throw "QuranShaped.ttf not found. Run tools\shape-arabic.py first."
 }

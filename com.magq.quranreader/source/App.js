@@ -43,9 +43,13 @@ enyo.kind({
         ]},
         {name: "about", kind: "ModalDialog", caption: "About Quran Reader", components: [
             {allowHtml: true, style: "padding: 8px 0;", content:
+                "All praise is due to Allah, the most high.<br><br>" +
                 "Arabic text: Tanzil Project (tanzil.net), Uthmani script.<br>" +
                 "English translation: Saheeh International.<br>" +
-                "Arabic font: Amiri Quran, modified as \"Quran Shaped\" (SIL Open Font License 1.1)."},
+                "Arabic font: Amiri Quran, modified as \"Quran Shaped\" (SIL Open Font License 1.1).<br><br>" +
+                "Any errors in the displaying of the Quran were done purely by accident. " +
+                "Contact MAGQ on the webOS Archive server if there are any. " +
+                "May Allah forgive those mistakes."},
             {kind: "Button", caption: "Close", onclick: "closeAbout"}
         ]}
     ],

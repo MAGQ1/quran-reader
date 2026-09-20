@@ -5,7 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var zlib = require('zlib');
 
-var OUT = path.join(__dirname, '..', 'com.webosquran.reader', 'images');
+var OUT = path.join(__dirname, '..', 'com.magq.quranreader', 'images');
 
 // CRC32, required by the PNG format.
 var crcTable = [];

@@ -18,7 +18,7 @@ Note: the bundle is ~555 KB, too big to read in one go. It gets saved to a file;
 
 ## Project Details
 
-**App ID:** `com.webosquran.reader` (placeholder name/ID — can be changed while nothing is installed on a device yet)
+**App name:** Quran Reader. **Vendor:** MAGQ. **App ID:** `com.magq.quranreader` (chosen 2026-09-20 instead of `com.quran.reader`: webOS IDs reverse a domain you own, and quran.com belongs to someone else). **The ID must not change once other people have the app installed.** Renamed from the old placeholder `com.webosquran.reader`; the About text and CREDITS.txt carry the user's praise line and the "errors were by accident, contact MAGQ" note — keep them in sync.
 **Framework:** Enyo 1 (the version built into the TouchPad; no build step). Not Enyo 2.
 **Target devices:** TouchPad
 **webOS version(s):** 3.0.5+
@@ -31,7 +31,7 @@ The user picks the **Arabic script** and **English translation** from the app's 
 
 Code rules: ES5 only in the app (`var`, no arrow functions/`let`/`const`/template strings) — the TouchPad's browser is from 2011. Every new JS file must be added to `depends.js` or it silently won't load.
 
-Key files (app folder is `com.webosquran.reader/`):
+Key files (app folder is `com.magq.quranreader/`):
 - `appinfo.json` — app manifest
 - `index.html` — entry page; starts `QuranApp`
 - `depends.js` — list of files to load, in order
@@ -124,12 +124,12 @@ python tools/shape-arabic.py            # add --preview <folder> for a PNG check
 powershell -ExecutionPolicy Bypass -File tools\install-font.ps1 -RestartLuna
 
 # Package and install (needs the webOS SDK)
-palm-package com.webosquran.reader/ && palm-install com.webosquran.reader_*.ipk
+palm-package com.magq.quranreader/ && palm-install com.magq.quranreader_*.ipk
 
 # Launch and watch logs
-palm-launch com.webosquran.reader && palm-log -f com.webosquran.reader
+palm-launch com.magq.quranreader && palm-log -f com.magq.quranreader
 
 # Quick file push (during active development)
-novacom put file:///media/cryptofs/apps/usr/palm/applications/com.webosquran.reader/source/Reader.js \
-  < com.webosquran.reader/source/Reader.js
+novacom put file:///media/cryptofs/apps/usr/palm/applications/com.magq.quranreader/source/Reader.js \
+  < com.magq.quranreader/source/Reader.js
 ```

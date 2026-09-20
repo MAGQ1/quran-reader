@@ -1,11 +1,15 @@
-Quran Reader - credits and licenses
+All praise is due to Allah, the most high.
+
+Quran Reader by MAGQ - credits and licenses
 
 Arabic text (Uthmani script)
   Tanzil Project - https://tanzil.net
   Obtained through api.alquran.cloud (edition "quran-uthmani").
   The opening Bismillah, which the source attaches to the first verse of
   most surahs, is shown as a separate heading; the verse text is otherwise
-  unchanged.
+  unchanged. For display on older devices the letters are joined and laid
+  out ahead of time (tools/shape-arabic.py); the original text is kept
+  unchanged inside the app.
 
 English translation
   Saheeh International (edition "en.sahih" on api.alquran.cloud).
@@ -18,3 +22,7 @@ Arabic font
   Quran made by tools/shape-arabic.py (letter shapes pre-joined and combined
   into single glyphs so older devices can draw them). It is distributed under
   the same license.
+
+Any errors in the displaying of the Quran were done purely by accident.
+Contact MAGQ on the webOS Archive server if there are any.
+May Allah forgive those mistakes.
