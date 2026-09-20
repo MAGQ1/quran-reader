@@ -6,6 +6,7 @@ enyo.depends(
     "source/Prefs.js",
     "source/FontCheck.js",
     "source/QuranData.js",
+    "source/JustType.js",
     "source/Home.js",
     "source/Reader.js",
     "source/App.js"

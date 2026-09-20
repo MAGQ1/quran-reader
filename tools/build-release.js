@@ -23,6 +23,11 @@ var appinfo = JSON.parse(fs.readFileSync(path.join(appDir, "appinfo.json"), "utf
 if (!/^\d+\.\d+\.\d+$/.test(appinfo.version)) {
     throw new Error("appinfo.json version must be #.#.# (three numbers), got " + appinfo.version);
 }
+// Just Type looks in a database kind named after the app id (see source/JustType.js).
+var jt = appinfo.universalSearch && appinfo.universalSearch.dbsearch;
+if (jt && (jt.url !== appinfo.id || jt.dbQuery.from !== appinfo.id + ".surah:1")) {
+    throw new Error("appinfo.json universalSearch.dbsearch must use the app id (" + appinfo.id + ") in \"url\" and \"dbQuery.from\" (" + appinfo.id + ".surah:1)");
+}
 if (!fs.existsSync(path.join(appDir, "fonts", "QuranShaped.ttf"))) {
     throw new Error("fonts/QuranShaped.ttf is missing - run tools/shape-arabic.py first");
 }

@@ -20,7 +20,10 @@ enyo.kind({
     kind: enyo.VFlexBox,
 
     components: [
-        {kind: "ApplicationEvents", onBack: "showHome"},
+        // Just Type (and a second launch while the app is running) send {surah: N}.
+        {kind: "ApplicationEvents", onBack: "showHome",
+            onWindowParamsChange: "launchParamsChanged", onApplicationRelaunch: "launchParamsChanged"},
+        {name: "justType", kind: "QuranJustType"},
         {kind: "AppMenu", components: [
             {caption: "Arabic script", components: QuranMenuItems("script_", QuranSources.scripts, "pickScript")},
             {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation")},
@@ -68,9 +71,25 @@ enyo.kind({
     rendered: function () {
         this.inherited(arguments);
         var self = this;
+        this.openFromParams(enyo.windowParams);   // started from Just Type
         setTimeout(function () {
             if (!QuranFont.isLoaded()) { self.$.fontDialog.openAtCenter(); }
         }, 800);
+        // Keep the Just Type surah list up to date, after the app has settled.
+        setTimeout(function () { self.$.justType.setup(); }, 3000);
+    },
+
+    launchParamsChanged: function (inSender, inEvent) {
+        this.openFromParams((inEvent && inEvent.params) || enyo.windowParams);
+    },
+
+    // Opens the surah named in launch parameters like {surah: "2"}; ignores anything else.
+    openFromParams: function (params) {
+        if (!params || params.surah === undefined) { return; }
+        var text = String(params.surah);
+        try { text = decodeURIComponent(text); } catch (e) { /* use it as it is */ }
+        var n = parseInt(text, 10);
+        if (n >= 1 && n <= 114) { this.openSurah(this, n, 1); }
     },
 
     closeFontDialog: function () {

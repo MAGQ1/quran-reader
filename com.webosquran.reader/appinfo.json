@@ -7,5 +7,20 @@
   "title": "Quran Reader",
   "icon": "images/icon.png",
   "miniicon": "images/miniicon.png",
-  "uiRevision": 2
+  "uiRevision": 2,
+  "keywords": ["quran", "koran", "surah", "juz"],
+  "universalSearch": {
+    "dbsearch": {
+      "displayName": "Quran",
+      "url": "com.webosquran.reader",
+      "launchParam": "surah",
+      "launchParamDbField": "id",
+      "displayFields": ["display", "secondary", "blank", "id"],
+      "dbQuery": {
+        "from": "com.webosquran.reader.surah:1",
+        "where": [{"prop": "search", "op": "?", "val": "", "collate": "primary"}],
+        "limit": 20
+      }
+    }
+  }
 }
