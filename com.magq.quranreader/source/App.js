@@ -27,12 +27,16 @@ enyo.kind({
         {kind: "ApplicationEvents", onBack: "showHome",
             onWindowParamsChange: "launchParamsChanged", onApplicationRelaunch: "launchParamsChanged"},
         {name: "justType", kind: "QuranJustType"},
+        // Update check (App Museum II). It shows its own "Update Now / Later" box when an update exists.
+        {name: "updater", kind: "Helpers.Updater", onNoUpdate: "updateNone", onCheckFailed: "updateFailed",
+            onInstallFailed: "updateInstallFailed"},
         {name: "openLink", kind: "PalmService", service: "palm://com.palm.applicationManager/", method: "open",
             onFailure: "linkFailed"},
         {kind: "AppMenu", components: [
             {caption: "Arabic script", components: QuranMenuItems("script_", QuranSources.scripts, "pickScript", "script")},
             {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation", "translation")},
             {caption: "Verse numbers", components: QuranMenuItems("numbers_", QuranSources.numberStyles, "pickNumbers", "numbers")},
+            {caption: "Check for updates", onclick: "checkUpdatesTap"},
             {caption: "About", onclick: "showAbout"}
         ]},
         {name: "pane", kind: "Pane", flex: 1, components: [
@@ -46,7 +50,13 @@ enyo.kind({
                 "This only happens after installing or updating the app."},
             {kind: "Button", caption: "OK", onclick: "closeFontDialog"}
         ]},
-        {name: "about", kind: "ModalDialog", className: "q-about", caption: "About Quran Reader", components: [
+        // lazy: false builds the dialog at start-up. (Enyo normally builds a dialog when it is first
+        // opened, so its text controls do not exist yet when the code sets their content.)
+        {name: "message", kind: "ModalDialog", lazy: false, caption: "", components: [
+            {name: "messageText", allowHtml: true, style: "padding: 8px 0;"},
+            {kind: "Button", caption: "OK", onclick: "closeMessage"}
+        ]},
+        {name: "about", kind: "ModalDialog", lazy: false, className: "q-about", caption: "About Quran Reader", components: [
             // Links are plain <a> tags carrying their address in data-url; aboutClick opens
             // them in the browser (a normal link would navigate the app away).
             {allowHtml: true, style: "padding: 8px 0;", onclick: "aboutClick", content:
@@ -60,9 +70,13 @@ enyo.kind({
                 "The Meaning of the Glorious Koran by Marmaduke Pickthall (public domain).<br><br>" +
                 "Arabic font: Amiri Quran, modified as \"Quran Shaped\" (SIL Open Font License 1.1).<br><br>" +
                 "This app is free and non-commercial.<br><br>" +
+                "Update check: the app asks appcatalog.webosarchive.org whether a newer version exists. " +
+                "It sends the app version, your device model and webOS version, and a random ID made by this app " +
+                "(no serial number).<br><br>" +
                 "Any errors in the displaying of the Quran were done purely by accident. " +
                 "Contact MAGQ on the webOS Archive server if there are any. " +
                 "May Allah forgive those mistakes."},
+            {name: "aboutVersion", style: "padding: 4px 0 8px 0; color: #666;"},
             {kind: "Button", caption: "Close", onclick: "closeAbout"}
         ]}
     ],
@@ -94,6 +108,8 @@ enyo.kind({
         }, 800);
         // Keep the Just Type surah list up to date, after the app has settled.
         setTimeout(function () { self.$.justType.setup(); }, 3000);
+        // Look for a newer version shortly after start (quietly; only speaks up if there is one).
+        setTimeout(function () { self.autoCheckForUpdate(); }, 6000);
     },
 
     launchParamsChanged: function (inSender, inEvent) {
@@ -171,7 +187,61 @@ enyo.kind({
     },
 
     showAbout: function () {
+        this.$.aboutVersion.setContent("Version " + this.appVersion());
         this.$.about.openAtCenter();
+    },
+
+    // ---- updates ----
+
+    // The name this app has in App Museum II. The update check only works if it matches
+    // the listing exactly (spelling, capitals, spaces).
+    museumName: "Quran Reader",
+
+    appVersion: function () {
+        try { return enyo.fetchAppInfo().version; } catch (e) { return "?"; }
+    },
+
+    // Automatic check on start: at most twice a day, and silent unless an update exists.
+    autoCheckForUpdate: function () {
+        var last = QuranPrefs.get("lastUpdateCheck", 0);
+        var now = new Date().getTime();
+        if (now >= last && now - last < 12 * 60 * 60 * 1000) { return; }
+        QuranPrefs.set("lastUpdateCheck", now);
+        this.manualCheck = false;
+        this.$.updater.CheckForUpdate(encodeURIComponent(this.museumName));
+    },
+
+    // The menu item: always checks, and always says what happened.
+    checkUpdatesTap: function () {
+        this.manualCheck = true;
+        this.$.updater.CheckForUpdate(encodeURIComponent(this.museumName));
+    },
+
+    updateNone: function () {
+        if (!this.manualCheck) { return; }
+        this.manualCheck = false;
+        this.showMessage("Check for updates", "You have the latest version (" + this.appVersion() + ").");
+    },
+
+    updateFailed: function () {
+        if (!this.manualCheck) { return; }
+        this.manualCheck = false;
+        this.showMessage("Check for updates", "Could not check for updates. Please check your internet connection and try again.");
+    },
+
+    updateInstallFailed: function () {
+        this.showMessage("Update", "Preware could not be opened. Preware is needed to install updates; " +
+            "you can also update from App Museum II.");
+    },
+
+    showMessage: function (caption, html) {
+        this.$.message.setCaption(caption);
+        this.$.messageText.setContent(html);
+        this.$.message.openAtCenter();
+    },
+
+    closeMessage: function () {
+        this.$.message.close();
     },
 
     // Opens a link tapped in the About text in the browser.

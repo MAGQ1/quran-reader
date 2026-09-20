@@ -30,6 +30,11 @@ Arabic font
   into single glyphs so older devices can draw them). It is distributed under
   the same license.
 
+Update checker
+  Updater Helper from webos-common (https://github.com/webOSArchive/webos-common)
+  by Jon W, MIT License - see licenses/webos-common-MIT.txt. This app uses a
+  modified copy (source/Updater-Helper.js lists the changes).
+
 Any errors in the displaying of the Quran were done purely by accident.
 Contact MAGQ on the webOS Archive server if there are any.
 May Allah forgive those mistakes.
