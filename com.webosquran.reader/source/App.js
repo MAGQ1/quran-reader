@@ -24,6 +24,7 @@ enyo.kind({
         {kind: "AppMenu", components: [
             {caption: "Arabic script", components: QuranMenuItems("script_", QuranSources.scripts, "pickScript")},
             {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation")},
+            {caption: "Verse numbers", components: QuranMenuItems("numbers_", QuranSources.numberStyles, "pickNumbers")},
             {caption: "About", onclick: "showAbout"}
         ]},
         {name: "pane", kind: "Pane", flex: 1, components: [
@@ -34,7 +35,7 @@ enyo.kind({
             {allowHtml: true, style: "padding: 8px 0;", content:
                 "Arabic text: Tanzil Project (tanzil.net), Uthmani script.<br>" +
                 "English translation: Saheeh International.<br>" +
-                "Arabic font: Amiri Quran (SIL Open Font License 1.1)."},
+                "Arabic font: Amiri Quran, modified as \"Quran Shaped\" (SIL Open Font License 1.1)."},
             {kind: "Button", caption: "Close", onclick: "closeAbout"}
         ]}
     ],
@@ -44,12 +45,13 @@ enyo.kind({
         // Saved choices; an unknown or missing value falls back to the first option.
         this.script = QuranSources.find(QuranSources.scripts, QuranPrefs.get("script", null));
         this.translation = QuranSources.find(QuranSources.translations, QuranPrefs.get("translation", null));
+        this.numbers = QuranSources.find(QuranSources.numberStyles, QuranPrefs.get("numbers", null));
         this.position = QuranPrefs.get("position", null);
         if (this.position && !(this.position.surah >= 1 && this.position.surah <= 114 && this.position.ayah >= 1)) {
             this.position = null;
         }
 
-        this.$.reader.setSources(this.script, this.translation);
+        this.$.reader.setSources(this.script, this.translation, this.numbers);
         this.$.home.setResume(this.position);
         this.updateMenuChecks();
     },
@@ -77,14 +79,21 @@ enyo.kind({
         this.script = QuranSources.find(QuranSources.scripts, inSender.sourceId);
         QuranPrefs.set("script", this.script.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation);
+        this.$.reader.setSources(this.script, this.translation, this.numbers);
     },
 
     pickTranslation: function (inSender) {
         this.translation = QuranSources.find(QuranSources.translations, inSender.sourceId);
         QuranPrefs.set("translation", this.translation.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation);
+        this.$.reader.setSources(this.script, this.translation, this.numbers);
+    },
+
+    pickNumbers: function (inSender) {
+        this.numbers = QuranSources.find(QuranSources.numberStyles, inSender.sourceId);
+        QuranPrefs.set("numbers", this.numbers.id);
+        this.updateMenuChecks();
+        this.$.reader.setSources(this.script, this.translation, this.numbers);
     },
 
     // Ticks the current choice in each submenu and unticks the others.
@@ -97,6 +106,10 @@ enyo.kind({
         QuranSources.translations.forEach(function (t) {
             var item = self.$["translation_" + t.id];
             if (item) { item.setChecked(t.id === self.translation.id); }
+        });
+        QuranSources.numberStyles.forEach(function (n) {
+            var item = self.$["numbers_" + n.id];
+            if (item) { item.setChecked(n.id === self.numbers.id); }
         });
     },
 

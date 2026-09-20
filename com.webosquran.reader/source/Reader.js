@@ -30,13 +30,15 @@ enyo.kind({
         this.token = 0;       // lets us ignore out-of-date loads
         this.script = QuranSources.scripts[0];
         this.translation = QuranSources.translations[0];
+        this.numbers = QuranSources.numberStyles[0];
     },
 
-    // Called by the app when the user picks another script or translation.
-    // Redraws the current surah and keeps the reader at the same verse.
-    setSources: function (script, translation) {
+    // Called by the app when the user picks another script, translation or
+    // number style. Redraws the current surah and keeps the reader at the same verse.
+    setSources: function (script, translation, numbers) {
         this.script = script;
         this.translation = translation;
+        this.numbers = numbers || QuranSources.numberStyles[0];
         if (this.surah) { this.load(this.surah, this.topAyah); }
     },
 
@@ -61,8 +63,8 @@ enyo.kind({
 
         QuranData.loadMany([
             {url: "data/surahs.json", cache: true},
-            {url: "data/bismillah.json", cache: true},
-            {url: this.script.folder + "/" + file, cache: false},
+            {url: this.script.shapedExtra, cache: true},
+            {url: this.script.shapedFolder + "/" + file, cache: false},
             {url: this.translation.folder + "/" + file, cache: false}
         ], function (err, results) {
             if (token !== self.token) { return; }   // user moved on; ignore
@@ -71,7 +73,7 @@ enyo.kind({
                 self.$.body.setContent('<div class="q-status">This surah could not be loaded.</div>');
                 return;
             }
-            self.draw(results[0][surah - 1], results[1].text, results[2], results[3], ayah);
+            self.draw(results[0][surah - 1], results[1].bismillah, results[2], results[3], ayah);
         });
     },
 
@@ -98,7 +100,7 @@ enyo.kind({
             html.push(
                 '<div class="q-ayah" id="ayah-' + n + '">' +
                 '<div class="q-ar"' + font + '>' + self.escapeHtml(text) +
-                ' <span class="q-ar-num">﴿' + self.arabicDigits(n) + '﴾</span></div>' +
+                ' <span class="q-ar-num">﴿' + (self.numbers.id === "regular" ? n : self.arabicDigits(n)) + '﴾</span></div>' +
                 '<div class="q-en"><span class="q-en-num">' + n + '.</span> ' + self.escapeHtml(english[i] || "") + '</div>' +
                 '</div>'
             );

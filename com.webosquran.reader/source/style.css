@@ -1,7 +1,6 @@
-@font-face {
-    font-family: "Amiri Quran";
-    src: url("../fonts/AmiriQuran-Regular.ttf") format("truetype");
-}
+/* Arabic uses the "Quran Shaped" font, which must be INSTALLED on the device
+   (tools/install-font.ps1). The TouchPad browser ignores web fonts, so there is
+   no @font-face here. The text is pre-joined by tools/shape-arabic.py. */
 
 /* ---- Home: surah / juz list ---- */
 .q-controls {
@@ -21,7 +20,7 @@
     color: #777;
 }
 .q-arabic {
-    font-family: "Amiri Quran", serif;
+    font-family: "Quran Shaped", serif;
     font-size: 30px;
     direction: rtl;
 }
@@ -34,7 +33,7 @@
     padding: 16px 28px 48px 28px;
 }
 .q-bismillah {
-    font-family: "Amiri Quran", serif;
+    font-family: "Quran Shaped", serif;
     font-size: 34px;
     text-align: center;
     padding: 12px 0 20px 0;
@@ -44,7 +43,7 @@
     border-bottom: 1px solid #e4dcc8;
 }
 .q-ar {
-    font-family: "Amiri Quran", serif;
+    font-family: "Quran Shaped", serif;
     font-size: 36px;
     line-height: 1.9;
     direction: rtl;
@@ -57,7 +56,7 @@
 .q-en {
     font-size: 19px;
     line-height: 1.45;
-    padding-top: 6px;
+    padding-top: 18px;
 }
 .q-en-num {
     color: #7a6a3a;

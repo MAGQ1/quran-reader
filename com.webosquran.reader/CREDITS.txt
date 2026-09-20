@@ -14,3 +14,7 @@ Arabic font
   Amiri Quran - Copyright 2010-2022 The Amiri Quran Project Authors
   (https://github.com/aliftype/amiri)
   Licensed under the SIL Open Font License 1.1 - see fonts/OFL.txt
+  The app displays Arabic with "Quran Shaped", a modified version of Amiri
+  Quran made by tools/shape-arabic.py (letter shapes pre-joined and combined
+  into single glyphs so older devices can draw them). It is distributed under
+  the same license.

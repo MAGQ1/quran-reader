@@ -40,6 +40,7 @@ enyo.kind({
         this.inherited(arguments);
         this.mode = "surah";   // "surah" or "juz"
         this.surahs = [];
+        this.shapedNames = [];
         this.juz = [];
         this.items = [];       // what the list currently shows
         this.loadIndex();
@@ -49,7 +50,8 @@ enyo.kind({
         var self = this;
         QuranData.loadMany([
             {url: "data/surahs.json", cache: true},
-            {url: "data/juz.json", cache: true}
+            {url: "data/juz.json", cache: true},
+            {url: QuranSources.scripts[0].shapedExtra, cache: true}
         ], function (err, results) {
             if (err) {
                 enyo.error("Could not load the surah index: " + err);
@@ -59,6 +61,7 @@ enyo.kind({
             }
             self.surahs = results[0];
             self.juz = results[1];
+            self.shapedNames = results[2].names;   // Arabic names, pre-joined for display
             self.updateItems();
             self.updateResume();
         });
@@ -102,7 +105,7 @@ enyo.kind({
             this.$.num.setContent(it.n);
             this.$.title.setContent(it.en + " – " + it.tr);
             this.$.sub.setContent(it.type + " · " + it.count + " verses");
-            this.$.arabic.setContent(it.ar);
+            this.$.arabic.setContent(this.shapedNames[it.n - 1] || "");
         }
         return true;
     },
