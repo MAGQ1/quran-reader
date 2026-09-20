@@ -14,12 +14,14 @@ enyo.kind({
 
     components: [
         {kind: "PageHeader", content: "Quran Reader"},
-        {kind: "HFlexBox", className: "q-controls", components: [
-            {name: "modeGroup", kind: "RadioGroup", onChange: "modeChange", components: [
+        // align: "center" stops the row from stretching the buttons to the height of
+        // the search box (which made them tall with the text stuck at the top).
+        {kind: "HFlexBox", className: "q-controls", align: "center", components: [
+            {name: "modeGroup", kind: "RadioGroup", className: "q-mode", onChange: "modeChange", components: [
                 {caption: "Surahs"},
                 {caption: "Juz"}
             ]},
-            {kind: "InputBox", flex: 1, style: "margin-left: 12px;", components: [
+            {name: "searchBox", kind: "InputBox", flex: 1, style: "margin-left: 12px;", components: [
                 {name: "search", kind: "Input", flex: 1, hint: "Search surahs", changeOnInput: true, onchange: "searchChange"}
             ]}
         ]},
@@ -114,7 +116,9 @@ enyo.kind({
 
     modeChange: function (inSender) {
         this.mode = (inSender.getValue() === 1) ? "juz" : "surah";
-        this.$.search.setShowing(this.mode === "surah");
+        // Hide it without removing it, so the row keeps its height and the buttons
+        // beside it do not jump when switching between Surahs and Juz.
+        this.$.searchBox.applyStyle("visibility", this.mode === "surah" ? "visible" : "hidden");
         this.updateItems();
     },
 

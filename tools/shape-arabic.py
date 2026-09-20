@@ -37,6 +37,7 @@ import sys
 import unicodedata
 
 import uharfbuzz as hb
+from fontTools.pens.boundsPen import BoundsPen
 from fontTools.pens.recordingPen import DecomposingRecordingPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
@@ -65,9 +66,11 @@ NONJOIN_GAP = 60
 # they do not reach into the line above.
 SIGN_DROP = 300
 
-# ... and move them this far toward the NEXT word (left on screen). In the original
-# they lean over the last letter of the word before, right on top of its vowel mark.
-SIGN_SHIFT = 220
+# Each sign is centred over the space between the two words (in the original it
+# leans over the last letter of the word before, right on top of its vowel mark).
+# SIGN_BIAS then nudges it this many font units toward the NEXT word (left on
+# screen); use a negative number to nudge it toward the word before.
+SIGN_BIAS = 60
 
 # Arabic letters that join only to the letter BEFORE them (never to the next one).
 RIGHT_JOINING = set([0x0622, 0x0623, 0x0624, 0x0625, 0x0627, 0x0629, 0x062F, 0x0630,
@@ -186,7 +189,20 @@ class Shaper(object):
             else:
                 found.append((info.codepoint, pen + pos.x_offset, pos.y_offset))
             pen += pos.x_advance
-        key = (tuple((gid, x - space_x - SIGN_SHIFT, y - SIGN_DROP, 0) for gid, x, y in found), 0)
+        # Centre the sign over the space, measured from where its outline really is.
+        left = right = None
+        for gid, x, y in found:
+            bp = BoundsPen(self.glyphset)
+            self.glyphset[self.order[gid]].draw(bp)
+            if bp.bounds:
+                lo, hi = x - space_x + bp.bounds[0], x - space_x + bp.bounds[2]
+                left = lo if left is None else min(left, lo)
+                right = hi if right is None else max(right, hi)
+        shift = 0
+        if left is not None:
+            space_width = self.hbfont.get_glyph_h_advance(space_gid)
+            shift = (left + right) / 2.0 - space_width / 2.0 + SIGN_BIAS
+        key = (tuple((gid, int(round(x - space_x - shift)), y - SIGN_DROP, 0) for gid, x, y in found), 0)
         cp = self.clusters.get(key)
         if cp is None:
             cp = PUA_START + len(self.keys)

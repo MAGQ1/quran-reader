@@ -6,6 +6,15 @@
 .q-controls {
     padding: 8px 12px;
 }
+/* Enyo radio buttons have a 16px decorative border on each side, so the room for the
+   text is the width minus 32px. Without a set width "Surahs" overflowed its button
+   and looked right-aligned. */
+/* !important is needed: Enyo sets flex:1 on each button as an inline style, which
+   would otherwise override this width. */
+.q-mode .enyo-radiobutton {
+    -webkit-box-flex: 0 !important;
+    width: 96px !important;
+}
 .q-row {
     padding: 10px 16px;
     border-bottom: 1px solid #ccc;

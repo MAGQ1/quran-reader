@@ -63,7 +63,7 @@ The TouchPad's browser **ignores `@font-face` web fonts entirely** (file URL, re
 4. The app's CSS therefore uses `font-family: "Quran Shaped"` with no `@font-face`. Because the font lives on the device and not in the app, **anyone else installing the app needs the font installed too** — before any public release this needs a proper route (e.g. a Preware-style package with a postinst script; `palm-install` does not run postinst scripts — see `webos://knowledge/postinst-packaging`).
 5. Changing only the data or app code needs just `palm-package` + `palm-install`; changing the font (or the shaped data, which the font goes with) needs the font install + Luna restart.
 6. Keep the font's `prep` hinting table (`shape-arabic.py` leaves `opts.hinting` at its default): a TrueType font with NO hinting program at all makes FreeType switch to its auto-hinter, which squashed letters and threw vowel marks away from their letters on the device.
-7. Stand-alone stop signs are marks between two spaces; shaped alone they land in the wrong place, so `Shaper.hanging()` shapes them after a space and stores them with zero width (they hang over the gap). The original font draws them 1.3–1.8 em high, hence `SIGN_DROP`, `SIGN_SHIFT` and the tall line-height.
+7. Stand-alone stop signs are marks between two spaces; shaped alone they land in the wrong place, so `Shaper.hanging()` shapes them after a space and stores them with zero width (they hang over the gap). The original font draws them 1.3–1.8 em high, hence `SIGN_DROP`, `SIGN_BIAS` (each sign is centred over the gap, then nudged) and the tall line-height.
 8. Letters that do not connect to the next one (ا د ذ ر ز و ة, before ء) get `NONJOIN_GAP` extra advance in the font (`gap_after()` uses Arabic joining types).
 
 Other lessons from the first device run:
@@ -71,6 +71,7 @@ Other lessons from the first device run:
 - `"uiRevision": 2` in `appinfo.json` is what makes the app full-screen on the TouchPad; without it it opens in a phone-sized window.
 - A plain (non-Enyo) HTML page must call `PalmSystem.stageReady()` or the launch splash never goes away (Enyo does this itself).
 - On this Windows SDK, `novacom run` needs the `file://` form: `novacom run file:///bin/ls -- -l /path`. Multi-part shell commands get mangled by PowerShell quoting — push a small `.sh` file with `novacom put` and run that instead.
+- Enyo 1 `RadioGroup` buttons: each has an inline `flex:1` (beats plain CSS `width` — use `!important`) and a 16px decorative border each side, so text wider than (button width − 32px) overflows to the right and looks right-aligned. An `HFlexBox` stretches its children to the tallest one unless `align: "center"` is set. Hide a control with `applyStyle("visibility", ...)` rather than `setShowing(false)` when the row height must not change.
 - `palm-log <appid>` (without `-f`) prints the log and exits, so it does not hold the single novacom session open.
 
 ## Services
@@ -83,7 +84,7 @@ The user has not coded before, so guide them step by step and explain what comma
 
 Status (2026-09-19): **running on a real TouchPad** (device shows as `topaz-linux`; webOS SDK is installed on this PC and on the PATH). Home list, reader, menu, saved settings, full-screen window and Arabic display all work. The Enyo 1 kinds used (`VirtualList`, `Pane`, `AppMenu`, `MenuCheckItem`, `ModalDialog`) load without errors.
 
-Working and confirmed on the device (2026-09-20): joined Arabic with correctly placed vowel marks, right-to-left word order and wrapping, Arabic-style/regular verse numbers (top menu), spacing between Arabic and English, surah names. Last change **not yet confirmed**: stop signs (ۚ ۖ ۗ …) moved left/lowered so they no longer touch the previous letter's vowel mark (`SIGN_SHIFT`/`SIGN_DROP` in `tools/shape-arabic.py`) — ask the user how Ayat al-Kursi (2:255) looks. Tunable knobs: `NONJOIN_GAP` (space after non-connecting letters), `SIGN_SHIFT`, `SIGN_DROP`; the CSS `line-height` of `.q-ar` (2.1) leaves room for the high stop signs.
+Working and confirmed on the device (2026-09-20): joined Arabic with correctly placed vowel marks, right-to-left word order and wrapping, Arabic-style/regular verse numbers (top menu), spacing between Arabic and English, surah names. Also confirmed: stop signs (ۚ ۖ ۗ …) sit clear of the neighbouring letters in Ayat al-Kursi (2:255), and the Surahs/Juz buttons are centred and do not move when switching. Tunable knobs: `NONJOIN_GAP` (space after non-connecting letters), `SIGN_BIAS`, `SIGN_DROP`; the CSS `line-height` of `.q-ar` (2.1) leaves room for the high stop signs.
 
 Planned next: **search inside the ayahs** (the plain Unicode text in `data/uthmani/` is kept untouched exactly for this — search it there, ignoring vowel marks, and use the shaped text only to display; shaped and plain verses have the same words in the same order, so a hit on word N can highlight word N).
 
