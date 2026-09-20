@@ -1,3 +1,12 @@
+/* About dialog: wider than the 320px default so the credits fit, and readable links. */
+.enyo-modaldialog.q-about {
+    width: 680px;
+}
+.q-link {
+    color: #1d6ec7;
+    text-decoration: underline;
+}
+
 /* Arabic uses the "Quran Shaped" font, which must be INSTALLED on the device
    (tools/install-font.ps1). The TouchPad browser ignores web fonts, so there is
    no @font-face here. The text is pre-joined by tools/shape-arabic.py. */

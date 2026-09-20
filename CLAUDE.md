@@ -27,7 +27,7 @@ Note: the bundle is ~555 KB, too big to read in one go. It gets saved to a file;
 
 A basic Quran reading app. The user can search surahs and browse by juz, read Arabic with an English translation side by side, and their reading position is saved. Recitation playback may come later.
 
-The user picks the **Arabic script** and **English translation** from the app's top drop-down menu. Currently offered: Uthmani script and Sahih International (Saheeh International). Choices are saved.
+The user picks the **Arabic script** and **English translation** from the app's top drop-down menu. Currently offered: Uthmani script; English translations Talal Itani (default, CC BY-ND 4.0, from ClearQuran itself) and Marmaduke Pickthall (public domain). Saheeh International was dropped on 2026-09-20 to avoid its non-commercial/notify-the-publisher conditions. Choices are saved (an unknown saved choice falls back to the first entry).
 
 Code rules: ES5 only in the app (`var`, no arrow functions/`let`/`const`/template strings) — the TouchPad's browser is from 2011. Every new JS file must be added to `depends.js` or it silently won't load.
 
@@ -50,6 +50,7 @@ Key files (app folder is `com.magq.quranreader/`):
 Outside the app folder (not packaged onto the device):
 - `tools/build-data.js` — downloads the texts and regenerates `data/` (`node tools/build-data.js`), with sanity checks (114 surahs, 6236 verses, 30 juz)
 - `tools/make-icons.js` — generates the two icons
+- `tools/fetch-itani.js` — reads Talal Itani's translation from clearquran.com into `data/itani` (run after `build-data.js`; never let `build-data.js` write that folder)
 - `tools/shape-arabic.py` — pre-joins the Arabic for the device and builds `QuranShaped.ttf` (Python; `pip install -r tools/requirements.txt`, ideally in a venv)
 - `tools/install-font.ps1` — copies the font onto the TouchPad and restarts Luna (development only)
 - `tools/build-release.js` (+ `tools/ipk.js`, `tools/release/postinst.sh`, `prerm.sh`) — builds `dist/<id>_<version>_all.ipk` with root install scripts that install/remove the font. **Must be installed with Preware/WOSQI, not palm-install.**
@@ -83,8 +84,8 @@ Goal: public release through the webOS Archive **App Museum II**, which installs
 - **Font:** shipped inside the package; `postinst` installs it (temp file + `mv`, never restarts Luna), `prerm` removes it. Verified on the TouchPad through Preware. Preware installs from a file/URL build the package record with NO metadata, so it never offers a Luna restart (restart flags only come from Preware *feed* entries) — hence the in-app dialog asking for a full or Luna restart.
 - **Just Type:** direct results (built and working). **Version 1.0 ships WITHOUT ayah-text search**; that is the first update, which also tests the update notification.
 - **Update notification (not built yet):** use the webOS Archive `Helpers.Updater` from `github.com/webOSArchive/webos-common` (Enyo/Updater-Helper.js, ES5). It asks `appcatalog.webosarchive.org/WebService/getLatestVersionInfo.php` for `<App Museum name>/<version>` and installs via Preware. Needs the app listed in App Museum under an exact registered name and a `#.#.#` version; check at most once per launch, fail silently offline, add a "Check for updates" menu item, and mention in About that it sends a device id and model.
-- **Submission:** no documented public process; contact the curators (webOS Archive site/Discord). Not done yet.
-- **Still to decide/do before release:** final app name and ID (the ID cannot change once users have it; it also appears in `appinfo.json` universalSearch and the db8 kind `<id>.surah:1` — `build-release.js` checks these match), real vendor name, icons, screenshots, description, version 1.0.0; verify the Tanzil and Saheeh International licence terms (the Saheeh permission is the likeliest blocker); make `install-font.ps1` replace the font with temp+`mv` like `postinst` does.
+- **Submission:** the user will have developer access to App Museum II, so no curator contact is needed. The exact App Museum name will be **Quran Reader** (the update check must use it exactly).
+- **Still to do before release:** the update notification, icons, screenshots, description, version 1.0.0 (the ID `com.magq.quranreader` also appears in `appinfo.json` universalSearch and the db8 kind `<id>.surah:1` — `build-release.js` checks these match); make `install-font.ps1` replace the font with temp+`mv` like `postinst` does. (Name/ID/vendor and the licence review are done — see below.)
 
 ## Just Type facts (verified on the device)
 
@@ -109,7 +110,14 @@ Working and confirmed on the device (2026-09-20): joined Arabic with correctly p
 
 Planned next: **search inside the ayahs** (the plain Unicode text in `data/uthmani/` is kept untouched exactly for this — search it there, ignoring vowel marks, and use the shaped text only to display; shaped and plain verses have the same words in the same order, so a hit on word N can highlight word N).
 
-Licensing to double-check before any public release: Tanzil text terms (attribution, no changes to the text), and Saheeh International translation terms.
+## Licensing (researched 2026-09-20; not legal advice)
+
+The app is **free and non-commercial** (decided; keep it that way — the Tanzil terms and some sources assume it).
+- **Arabic text — Tanzil, CC BY 3.0:** verbatim copies only, "CHANGING IT IS NOT ALLOWED"; must clearly credit Tanzil Project, link to tanzil.net, and reproduce the copyright notice in derived files (`data/NOTICE.txt`; About has an Open tanzil.net button). The original Unicode text stays unchanged in `data/uthmani/`; the joined-letter copy is a rendering of it. Al Quran Cloud also asks that Uthmani spelling and diacritics be preserved.
+- **Talal Itani — CC BY-ND 4.0** (https://blog.clearquran.com/download): free incl. commercial, files must stay unmodified, credit exactly "Translation by Talal Itani, ClearQuran.com", link and licence note appreciated (About has an Open clearquran.com button). **`data/itani` comes from clearquran.com itself (`node tools/fetch-itani.js`), NOT from Al Quran Cloud** — that copy is an older revision (43 verses differ, with typos). `tools/build-data.js` deliberately does not touch `data/itani`. Itani writes "God" where Pickthall writes "Allah".
+- **Pickthall (1930) — public domain** (published before 1 Jan 1931; died 1936). From Al Quran Cloud `en.pickthall`.
+- **Amiri Quran — SIL OFL 1.1:** modified font must stay under OFL with the copyright notice, no reserved font name, cannot be sold alone; ours is renamed "Quran Shaped" (`fonts/OFL.txt`).
+- **Rejected:** Yusuf Ali (original copyrighted in 1946, common editions are copyrighted Amana revisions) and Saheeh International (Tanzil: non-commercial only; the book asks that the publisher be notified).
 
 ## Useful Commands
 

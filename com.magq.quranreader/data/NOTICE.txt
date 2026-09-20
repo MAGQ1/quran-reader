@@ -1,0 +1,51 @@
+NOTICES FOR THE DATA IN THIS FOLDER
+
+Quran Reader by MAGQ is a free, non-commercial app.
+
+
+ARABIC TEXT -- uthmani/, uthmani-shaped/, shaped-extra.json, bismillah.json
+------------------------------------------------------------------------------
+Tanzil Quran Text (Uthmani)
+Copyright (C) 2007-2021 Tanzil Project - https://tanzil.net
+License: Creative Commons Attribution 3.0
+
+Terms of use, summarised from https://tanzil.net/docs/text_license :
+  - "Permission is granted to copy and distribute verbatim copies of this
+    text", but "CHANGING IT IS NOT ALLOWED".
+  - The text may be used in any website or application, provided that its
+    source (Tanzil Project) is clearly indicated and a link is made to
+    tanzil.net so that users can keep track of changes.
+  - This copyright notice is to be included in all verbatim copies of the
+    text, and reproduced appropriately in all files derived from or
+    containing a substantial portion of it.
+
+How this app uses the text:
+  - uthmani/ holds the text unchanged. It was obtained through
+    api.alquran.cloud (edition "quran-uthmani"). The only difference from
+    that source is that the Bismillah, which the source attaches to the first
+    verse of most surahs, is shown as a separate heading (see bismillah.json).
+  - uthmani-shaped/ and shaped-extra.json are the SAME text with its letters
+    joined and laid out ahead of time so that older devices can draw it
+    (tools/shape-arabic.py). They are a rendering of the text above, not a
+    different text: every word is present, in the same order. They are stored
+    as private-use characters that only the app's "Quran Shaped" font can draw.
+
+
+ENGLISH TRANSLATION -- itani/
+------------------------------------------------------------------------------
+Translation by Talal Itani, ClearQuran.com - https://www.clearquran.com
+Licensed under the Creative Commons Attribution-NoDerivatives 4.0
+International License (CC BY-ND 4.0):
+https://creativecommons.org/licenses/by-nd/4.0/
+Licence and credit terms: https://blog.clearquran.com/download
+
+The text is used without any changes. It was read from the ClearQuran pages
+themselves (tools/fetch-itani.js), with only the page markup removed.
+
+
+ENGLISH TRANSLATION -- pickthall/
+------------------------------------------------------------------------------
+The Meaning of the Glorious Koran, by Mohammed Marmaduke Pickthall (1930).
+This work is in the public domain: it was published before 1 January 1931,
+and its translator died in 1936.
+Obtained through api.alquran.cloud (edition "en.pickthall").

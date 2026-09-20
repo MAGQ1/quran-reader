@@ -24,8 +24,11 @@ var QuranSources = {
         }
     ],
 
+    // The first one is the default. A saved choice that no longer exists (for example
+    // "sahih" from an older version) falls back to it.
     translations: [
-        { id: "sahih", label: "Sahih International", folder: "data/sahih" }
+        { id: "itani", label: "Talal Itani (Clear Quran)", folder: "data/itani" },
+        { id: "pickthall", label: "Marmaduke Pickthall", folder: "data/pickthall" }
     ],
 
     // How the verse numbers after each Arabic verse are written.

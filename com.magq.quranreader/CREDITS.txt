@@ -1,18 +1,25 @@
 All praise is due to Allah, the most high.
 
 Quran Reader by MAGQ - credits and licenses
+This app is free and non-commercial.
 
 Arabic text (Uthmani script)
-  Tanzil Project - https://tanzil.net
+  Tanzil Quran Text - Copyright (C) 2007-2021 Tanzil Project
+  https://tanzil.net - Creative Commons Attribution 3.0
   Obtained through api.alquran.cloud (edition "quran-uthmani").
-  The opening Bismillah, which the source attaches to the first verse of
-  most surahs, is shown as a separate heading; the verse text is otherwise
-  unchanged. For display on older devices the letters are joined and laid
-  out ahead of time (tools/shape-arabic.py); the original text is kept
-  unchanged inside the app.
+  The text may not be changed, and it is kept unchanged inside the app. The
+  only difference from the source is that the Bismillah, which the source
+  attaches to the first verse of most surahs, is shown as a separate heading.
+  For display on older devices the letters are joined and laid out ahead of
+  time (tools/shape-arabic.py); that is a rendering of the same text.
+  Full notice: data/NOTICE.txt
 
-English translation
-  Saheeh International (edition "en.sahih" on api.alquran.cloud).
+English translations
+  Translation by Talal Itani, ClearQuran.com (https://www.clearquran.com)
+  Creative Commons Attribution-NoDerivatives 4.0 (CC BY-ND 4.0). Used without
+  any changes, from the ClearQuran pages themselves.
+  The Meaning of the Glorious Koran by Marmaduke Pickthall (1930), which is in
+  the public domain.
 
 Arabic font
   Amiri Quran - Copyright 2010-2022 The Amiri Quran Project Authors

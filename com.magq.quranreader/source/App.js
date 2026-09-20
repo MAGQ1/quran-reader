@@ -2,14 +2,17 @@
 // where the user picks the Arabic script and the English translation.
 
 // Builds one tick-box menu item per available source. The item remembers
-// which source it stands for in `sourceId`.
-var QuranMenuItems = function (prefix, list, handler) {
+// which source it stands for in `sourceId`. Enyo builds menus lazily, so the tick
+// for the saved choice is set here, when the item is defined, not later.
+var QuranMenuItems = function (prefix, list, handler, prefKey) {
+    var selected = QuranSources.find(list, QuranPrefs.get(prefKey, null)).id;
     return list.map(function (src) {
         return {
             name: prefix + src.id,
             kind: "MenuCheckItem",
             caption: src.label,
             sourceId: src.id,
+            checked: src.id === selected,
             onclick: handler
         };
     });
@@ -24,10 +27,12 @@ enyo.kind({
         {kind: "ApplicationEvents", onBack: "showHome",
             onWindowParamsChange: "launchParamsChanged", onApplicationRelaunch: "launchParamsChanged"},
         {name: "justType", kind: "QuranJustType"},
+        {name: "openLink", kind: "PalmService", service: "palm://com.palm.applicationManager/", method: "open",
+            onFailure: "linkFailed"},
         {kind: "AppMenu", components: [
-            {caption: "Arabic script", components: QuranMenuItems("script_", QuranSources.scripts, "pickScript")},
-            {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation")},
-            {caption: "Verse numbers", components: QuranMenuItems("numbers_", QuranSources.numberStyles, "pickNumbers")},
+            {caption: "Arabic script", components: QuranMenuItems("script_", QuranSources.scripts, "pickScript", "script")},
+            {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation", "translation")},
+            {caption: "Verse numbers", components: QuranMenuItems("numbers_", QuranSources.numberStyles, "pickNumbers", "numbers")},
             {caption: "About", onclick: "showAbout"}
         ]},
         {name: "pane", kind: "Pane", flex: 1, components: [
@@ -41,12 +46,20 @@ enyo.kind({
                 "This only happens after installing or updating the app."},
             {kind: "Button", caption: "OK", onclick: "closeFontDialog"}
         ]},
-        {name: "about", kind: "ModalDialog", caption: "About Quran Reader", components: [
-            {allowHtml: true, style: "padding: 8px 0;", content:
+        {name: "about", kind: "ModalDialog", className: "q-about", caption: "About Quran Reader", components: [
+            // Links are plain <a> tags carrying their address in data-url; aboutClick opens
+            // them in the browser (a normal link would navigate the app away).
+            {allowHtml: true, style: "padding: 8px 0;", onclick: "aboutClick", content:
                 "All praise is due to Allah, the most high.<br><br>" +
-                "Arabic text: Tanzil Project (tanzil.net), Uthmani script.<br>" +
-                "English translation: Saheeh International.<br>" +
+                "Arabic text: <a href=\"#\" class=\"q-link\" data-url=\"http://tanzil.net\">Tanzil Project (tanzil.net)</a>, " +
+                "Uthmani script. Copyright (C) 2007-2021 Tanzil Project, " +
+                "<a href=\"#\" class=\"q-link\" data-url=\"http://creativecommons.org/licenses/by/3.0/\">Creative Commons Attribution 3.0</a>. " +
+                "The text is unchanged.<br><br>" +
+                "English translations: <a href=\"#\" class=\"q-link\" data-url=\"https://www.clearquran.com\">Translation by Talal Itani, ClearQuran.com</a> " +
+                "(<a href=\"#\" class=\"q-link\" data-url=\"http://creativecommons.org/licenses/by-nd/4.0/\">CC BY-ND 4.0</a>), and " +
+                "The Meaning of the Glorious Koran by Marmaduke Pickthall (public domain).<br><br>" +
                 "Arabic font: Amiri Quran, modified as \"Quran Shaped\" (SIL Open Font License 1.1).<br><br>" +
+                "This app is free and non-commercial.<br><br>" +
                 "Any errors in the displaying of the Quran were done purely by accident. " +
                 "Contact MAGQ on the webOS Archive server if there are any. " +
                 "May Allah forgive those mistakes."},
@@ -159,6 +172,20 @@ enyo.kind({
 
     showAbout: function () {
         this.$.about.openAtCenter();
+    },
+
+    // Opens a link tapped in the About text in the browser.
+    aboutClick: function (inSender, inEvent) {
+        var node = inEvent && inEvent.target;
+        var url = node && node.getAttribute ? node.getAttribute("data-url") : null;
+        if (url) {
+            if (inEvent.preventDefault) { inEvent.preventDefault(); }
+            this.$.openLink.call({target: url});
+        }
+    },
+
+    linkFailed: function (inSender, inError) {
+        enyo.error("Could not open the browser: " + enyo.json.stringify(inError));
     },
 
     closeAbout: function () {

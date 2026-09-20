@@ -5,7 +5,11 @@
 //   node tools/build-data.js
 //
 // Source: api.alquran.cloud. The Uthmani text comes from the Tanzil project
-// (tanzil.net) and the translation is Saheeh International. See CREDITS.txt.
+// (tanzil.net) and Marmaduke Pickthall's translation (public domain) also comes
+// from here. Talal Itani's translation (CC BY-ND 4.0) does NOT: this script does not
+// touch data/itani, which comes from ClearQuran itself (node tools/fetch-itani.js),
+// because the Al Quran Cloud copy is an older revision with typos.
+// See CREDITS.txt and data/NOTICE.txt.
 
 var https = require('https');
 var fs = require('fs');
@@ -15,9 +19,13 @@ var OUT = path.join(__dirname, '..', 'com.magq.quranreader', 'data');
 
 // Each entry becomes data/<folder>/001.json ... 114.json
 var EDITIONS = [
-    { id: 'quran-uthmani', folder: 'uthmani', stripBismillah: true },
-    { id: 'en.sahih',      folder: 'sahih',   stripBismillah: false }
+    { id: 'quran-uthmani', folder: 'uthmani' },
+    { id: 'en.pickthall',  folder: 'pickthall' }
 ];
+
+// The English translations (folders under data/). Add a new one here and in
+// EDITIONS above, and in source/Sources.js.
+var TRANSLATIONS = ['pickthall'];
 
 function get(url, cb) {
     https.get(url, function (res) {
@@ -63,7 +71,6 @@ function build(editions, i, results) {
 
 function finish(results) {
     var uth = results.uthmani;
-    var eng = results.sahih;
 
     // The Bismillah text, taken from the first verse of Al-Fatiha.
     var bismillah = uth[0].ayahs[0].text.replace(/^﻿/, '').trim();
@@ -74,9 +81,12 @@ function finish(results) {
     var juzStarts = {};
 
     uth.forEach(function (s, si) {
-        var e = eng[si];
-        check(s.number === si + 1 && e.number === si + 1, 'surah numbering at ' + (si + 1));
-        check(s.ayahs.length === e.ayahs.length, 'ayah count mismatch in surah ' + s.number);
+        check(s.number === si + 1, 'surah numbering at ' + (si + 1));
+        TRANSLATIONS.forEach(function (folder) {
+            var e = results[folder][si];
+            check(e.number === si + 1, folder + ': surah numbering at ' + (si + 1));
+            check(s.ayahs.length === e.ayahs.length, folder + ': ayah count mismatch in surah ' + s.number);
+        });
 
         var arabic = s.ayahs.map(function (a, ai) {
             check(a.numberInSurah === ai + 1, 'ayah numbering in surah ' + s.number);
@@ -95,14 +105,15 @@ function finish(results) {
             if (!juzStarts[a.juz]) { juzStarts[a.juz] = { juz: a.juz, surah: s.number, ayah: a.numberInSurah }; }
             return t;
         });
-        var english = e.ayahs.map(function (a, ai) {
-            check(a.text.length > 0, 'empty English text at ' + s.number + ':' + (ai + 1));
-            return a.text;
-        });
-
         totalAyahs += arabic.length;
         writeJson(path.join(OUT, 'uthmani', pad3(s.number) + '.json'), arabic);
-        writeJson(path.join(OUT, 'sahih', pad3(s.number) + '.json'), english);
+        TRANSLATIONS.forEach(function (folder) {
+            var english = results[folder][si].ayahs.map(function (a, ai) {
+                check(a.text.length > 0, folder + ': empty English text at ' + s.number + ':' + (ai + 1));
+                return a.text;
+            });
+            writeJson(path.join(OUT, folder, pad3(s.number) + '.json'), english);
+        });
 
         index.push({
             n: s.number,
