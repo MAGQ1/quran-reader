@@ -1,0 +1,74 @@
+@font-face {
+    font-family: "Amiri Quran";
+    src: url("../fonts/AmiriQuran-Regular.ttf") format("truetype");
+}
+
+/* ---- Home: surah / juz list ---- */
+.q-controls {
+    padding: 8px 12px;
+}
+.q-row {
+    padding: 10px 16px;
+    border-bottom: 1px solid #ccc;
+}
+.q-num {
+    width: 48px;
+    font-weight: bold;
+    color: #666;
+}
+.q-sub {
+    font-size: 14px;
+    color: #777;
+}
+.q-arabic {
+    font-family: "Amiri Quran", serif;
+    font-size: 30px;
+    direction: rtl;
+}
+
+/* ---- Reader ---- */
+.reader-body {
+    position: relative; /* Reader.js measures verse positions from here */
+    background: #fbf7ee;
+    color: #222;
+    padding: 16px 28px 48px 28px;
+}
+.q-bismillah {
+    font-family: "Amiri Quran", serif;
+    font-size: 34px;
+    text-align: center;
+    padding: 12px 0 20px 0;
+}
+.q-ayah {
+    padding: 14px 0;
+    border-bottom: 1px solid #e4dcc8;
+}
+.q-ar {
+    font-family: "Amiri Quran", serif;
+    font-size: 36px;
+    line-height: 1.9;
+    direction: rtl;
+    text-align: right;
+}
+.q-ar-num {
+    font-size: 26px;
+    color: #7a6a3a;
+}
+.q-en {
+    font-size: 19px;
+    line-height: 1.45;
+    padding-top: 6px;
+}
+.q-en-num {
+    color: #7a6a3a;
+    font-weight: bold;
+}
+.q-status {
+    padding: 40px 0;
+    text-align: center;
+    color: #666;
+}
+.q-title {
+    text-align: center;
+    font-weight: bold;
+}

@@ -1,0 +1,16 @@
+Quran Reader - credits and licenses
+
+Arabic text (Uthmani script)
+  Tanzil Project - https://tanzil.net
+  Obtained through api.alquran.cloud (edition "quran-uthmani").
+  The opening Bismillah, which the source attaches to the first verse of
+  most surahs, is shown as a separate heading; the verse text is otherwise
+  unchanged.
+
+English translation
+  Saheeh International (edition "en.sahih" on api.alquran.cloud).
+
+Arabic font
+  Amiri Quran - Copyright 2010-2022 The Amiri Quran Project Authors
+  (https://github.com/aliftype/amiri)
+  Licensed under the SIL Open Font License 1.1 - see fonts/OFL.txt

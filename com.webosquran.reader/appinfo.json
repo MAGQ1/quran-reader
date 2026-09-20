@@ -1,0 +1,11 @@
+{
+  "id": "com.webosquran.reader",
+  "version": "0.1.0",
+  "vendor": "Personal",
+  "type": "web",
+  "main": "index.html",
+  "title": "Quran Reader",
+  "icon": "images/icon.png",
+  "miniicon": "images/miniicon.png",
+  "uiRevision": 2
+}

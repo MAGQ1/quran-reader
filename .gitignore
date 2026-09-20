@@ -1,0 +1,7 @@
+# packaged apps
+*.ipk
+
+# editor / OS files
+.DS_Store
+Thumbs.db
+node_modules/
