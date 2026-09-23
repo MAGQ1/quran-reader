@@ -52,6 +52,7 @@ Everything is included in the app, so it works fully offline.
   and The Meaning of the Glorious Koran by Marmaduke Pickthall (public domain).
 - Arabic font: Amiri Quran (SIL Open Font License 1.1), modified as "Quran Shaped".
 - Update checker: webos-common by Jon W (MIT).
+- Quran Reader's own source code: MIT License, Copyright (c) 2026 MAGQ.
 
 All praise is due to Allah, the most high.
 

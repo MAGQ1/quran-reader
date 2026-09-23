@@ -120,6 +120,7 @@ The app is **free and non-commercial** (decided; keep it that way — the Tanzil
 - **Pickthall (1930) — public domain** (published before 1 Jan 1931; died 1936). From Al Quran Cloud `en.pickthall`.
 - **Amiri Quran — SIL OFL 1.1:** modified font must stay under OFL with the copyright notice, no reserved font name, cannot be sold alone; ours is renamed "Quran Shaped" (`fonts/OFL.txt`).
 - **Rejected:** Yusuf Ali (original copyrighted in 1946, common editions are copyrighted Amana revisions) and Saheeh International (Tanzil: non-commercial only; the book asks that the publisher be notified).
+- **The app's own source code (decided 2026-09-23): MIT License**, `/LICENSE` at the repo root, Copyright (c) 2026 MAGQ. This is separate from and does not affect the bundled content above (Tanzil text, translations, Amiri/Quran Shaped font all keep their own licenses regardless of this file). `Updater-Helper.js` stays under its own MIT notice (`licenses/webos-common-MIT.txt`). `CREDITS.txt` and `store/DESCRIPTION.md` both note this.
 
 ## Useful Commands
 

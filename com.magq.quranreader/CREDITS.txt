@@ -35,6 +35,11 @@ Update checker
   by Jon W, MIT License - see licenses/webos-common-MIT.txt. This app uses a
   modified copy (source/Updater-Helper.js lists the changes).
 
+App source code
+  The Quran Reader app itself (the Enyo/JavaScript source, build tools, etc.,
+  everything not listed above) - Copyright (c) 2026 MAGQ.
+  Licensed under the MIT License - see LICENSE in the project root.
+
 Any errors in the displaying of the Quran were done purely by accident.
 Contact MAGQ on the webOS Archive server if there are any.
 May Allah forgive those mistakes.
