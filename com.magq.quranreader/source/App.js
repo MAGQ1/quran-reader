@@ -60,7 +60,7 @@ enyo.kind({
             // Links are plain <a> tags carrying their address in data-url; aboutClick opens
             // them in the browser (a normal link would navigate the app away).
             {allowHtml: true, style: "padding: 8px 0;", onclick: "aboutClick", content:
-                "All praise is due to Allah, the most high.<br><br>" +
+                "All praise is due to Allah, the Most High.<br><br>" +
                 "Arabic text: <a href=\"#\" class=\"q-link\" data-url=\"http://tanzil.net\">Tanzil Project (tanzil.net)</a>, " +
                 "Uthmani script. Copyright (C) 2007-2021 Tanzil Project, " +
                 "<a href=\"#\" class=\"q-link\" data-url=\"http://creativecommons.org/licenses/by/3.0/\">Creative Commons Attribution 3.0</a>. " +

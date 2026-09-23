@@ -54,7 +54,7 @@ Everything is included in the app, so it works fully offline.
 - Update checker: webos-common by Jon W (MIT).
 - Quran Reader's own source code: MIT License, Copyright (c) 2026 MAGQ.
 
-All praise is due to Allah, the most high.
+All praise is due to Allah, the Most High.
 
 ## Files for the listing
 
