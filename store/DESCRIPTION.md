@@ -56,6 +56,18 @@ Everything is included in the app, so it works fully offline.
 
 All praise is due to Allah, the Most High.
 
+## Changelog
+
+### 1.0.0 - 2026-09-23
+
+First public release.
+- Arabic Quran text (Uthmani script), joined and laid out for the TouchPad
+- Two English translations: Talal Itani (default) and Marmaduke Pickthall
+- Arabic-style or regular verse numbers, choice saved
+- Browse by surah or juz, search by name/number, "Continue reading"
+- Just Type support - search surahs straight from the launcher
+- Checks for updates automatically
+
 ## Files for the listing
 
 - `icon-64.png` and `icon-256.png` (in this folder)
