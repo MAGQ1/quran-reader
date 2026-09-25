@@ -58,6 +58,6 @@ All praise is due to Allah, the Most High.
 
 ## Files for the listing
 
-- `icon-256.png` (in this folder)
+- `icon-64.png` and `icon-256.png` (in this folder)
 - Screenshots: to be added (suggested: home screen, a surah with Arabic and
   English, About screen)

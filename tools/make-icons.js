@@ -166,7 +166,9 @@ function png(size) {
 
 fs.mkdirSync(APP_IMAGES, { recursive: true });
 fs.mkdirSync(STORE, { recursive: true });
-fs.writeFileSync(path.join(APP_IMAGES, 'icon.png'), png(64));
+var icon64 = png(64);
+fs.writeFileSync(path.join(APP_IMAGES, 'icon.png'), icon64);
 fs.writeFileSync(path.join(APP_IMAGES, 'miniicon.png'), png(48));
+fs.writeFileSync(path.join(STORE, 'icon-64.png'), icon64);   // App Museum listing wants both sizes
 fs.writeFileSync(path.join(STORE, 'icon-256.png'), png(256));
-console.log('Wrote images/icon.png (64x64), images/miniicon.png (48x48) and store/icon-256.png (256x256)');
+console.log('Wrote images/icon.png (64x64), images/miniicon.png (48x48), store/icon-64.png and store/icon-256.png (256x256)');
