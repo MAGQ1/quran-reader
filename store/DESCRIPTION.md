@@ -58,7 +58,7 @@ All praise is due to Allah, the Most High.
 
 ## Changelog
 
-### 1.0.0 - 2026-09-23
+### 1.0.0
 
 First public release.
 - Arabic Quran text (Uthmani script), joined and laid out for the TouchPad
