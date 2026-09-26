@@ -80,9 +80,13 @@ All praise is due to Allah, the Most High.
 ### 1.1.0
 
 - Dark theme
-- Verse recitation, with the verse being read highlighted on screen. Choose
-  from three reciters. Play from the toolbar, from a single verse, or jump to
-  a verse number and continue listening from there
+- Recitation, verse by verse, with the verse being read highlighted on screen.
+  Choose from three reciters (Mishary Alafasy, Mahmoud Khalil Al-Husary, Abdul
+  Basit Abdul Samad). Play from the toolbar, play just one verse, play from any
+  verse onward, or type a verse number into "Play from verse..." or "Go to
+  verse...". Choose how long a pause to leave between verses. Recitation needs
+  an internet connection; everything else still works offline.
+- The surah buttons are now labelled "Prev Surah" / "Next Surah"
 
 ### 1.0.0
 
