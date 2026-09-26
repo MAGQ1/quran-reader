@@ -21,7 +21,7 @@ Note: the bundle is ~555 KB, too big to read in one go. It gets saved to a file;
 **App name:** Quran Reader. **Vendor:** MAGQ. **App ID:** `com.magq.quranreader` (chosen 2026-09-20 instead of `com.quran.reader`: webOS IDs reverse a domain you own, and quran.com belongs to someone else). **The ID must not change once other people have the app installed.** Renamed from the old placeholder `com.webosquran.reader`; the About text and CREDITS.txt carry the user's praise line and the "errors were by accident, contact MAGQ" note — keep them in sync.
 **Framework:** Enyo 1 (the version built into the TouchPad; no build step). Not Enyo 2.
 **Target devices:** TouchPad
-**webOS version(s):** 3.0.5+
+**webOS version(s):** 3.0.5+. The dev TouchPad was upgraded 2026-09-26 to **webOS CE 3.1.0** (community build, Nova-HP-Topaz #86, `cat /etc/palm-build-info`). The app, its font, and everything else survived the OS upgrade untouched at the same paths. One change worth knowing: `/usr/palm/frameworks/enyo/` now has both `0.10` (what this app is built against and what `index.html` still loads) and a new `1.0` folder — **do not switch to it** without deliberately testing; treat that as a separate, careful migration, not an incidental change.
 
 ## App Structure
 
@@ -110,7 +110,22 @@ Status (2026-09-19): **running on a real TouchPad** (device shows as `topaz-linu
 
 Working and confirmed on the device (2026-09-20): joined Arabic with correctly placed vowel marks, right-to-left word order and wrapping, Arabic-style/regular verse numbers (top menu), spacing between Arabic and English, surah names. Also confirmed: stop signs (ۚ ۖ ۗ …) sit clear of the neighbouring letters in Ayat al-Kursi (2:255), and the Surahs/Juz buttons are centred and do not move when switching. Tunable knobs: `NONJOIN_GAP` (space after non-connecting letters), `SIGN_BIAS`, `SIGN_DROP`; the CSS `line-height` of `.q-ar` (2.1) leaves room for the high stop signs.
 
+**webOS CE 3.1.0 (from 2026-09-26):** the dev TouchPad now runs the community `webOS CE 3.1.0` build (see Project Details above). **`palm-install`, `palm-launch` and `palm-log` all refuse with `unrecognized device version`** — a compatibility whitelist baked into the ~2011-era SDK host tools that CE's version string isn't on. `palm-package` (host-only, no device talk) is unaffected. Use **`tools/install-ce.ps1`** instead of the plain install/launch commands below: it tries the normal SDK tool first and falls back automatically to (1) `novacom put` + on-device `ipkg -o /media/cryptofs/apps -force-depends install` for installing, (2) a raw `luna-send palm://com.palm.applicationManager/launch` call for launching, (3) `tail /var/log/messages | grep <app-id>` in place of `palm-log` (the same `enyo-build.js` lines show up there, tagged `{LunaSysMgrJS}`). Same underlying `ipkg` version-must-increase rule applies as `palm-install` — bump `appinfo.json` before reinstalling, or uninstall first. (The sibling `WebOS KOReader` project hit this first and worked out the same fix; `tools/install-ce.ps1` here is adapted from its `webos/install.ps1`.)
+
+Dark theme (built + confirmed on the device 2026-09-26): a "Theme" menu (Light/Dark, saved like the other menus). Applied by toggling a `q-dark` class on `document.body` — **not** on the app's own root control — because Enyo's popups (the top menu, About/restart dialogs) render into a separate DOM layer that is only a descendant of `<body>`, not of the app's own tree. Popup chrome (the Onyx dialog border image) is a fixed light-coloured graphic either way and is not re-themed; only Home/Reader content is. See the `body.q-dark` rules at the end of `style.css`.
+
 Planned next: **search inside the ayahs** (the plain Unicode text in `data/uthmani/` is kept untouched exactly for this — search it there, ignoring vowel marks, and use the shaped text only to display; shaped and plain verses have the same words in the same order, so a hit on word N can highlight word N).
+
+## Indo-Pak script — investigated 2026-09-26, DEFERRED (do not build yet)
+
+The user asked for a dark theme (built this session, see below) and an Indo-Pak script option. The dark theme is independent and unblocked. Indo-Pak hit a real licensing wall:
+
+- **Al Quran Cloud (our data source) has no Indo-Pak edition at all.**
+- Indo-Pak uses the same underlying wording (rasm) as Uthmani, but a different orthographic/diacritic convention (simplified alif/hamza, stacked vowel marks vs. Uthmani's spacing) — it is **not confirmed** whether our existing `data/uthmani/` text could just be re-shaped with a different font, or whether genuinely separately-encoded Indo-Pak text is required. Needs testing against whatever font is actually used, if this is revisited.
+- **Font lead: [DigitalKhatt/indopakfont](https://github.com/DigitalKhatt/indopakfont)** is SIL OFL 1.1 (same family as our Amiri font), sponsored by TarteelAI. DigitalKhatt's own *shaping engine* repos (`visualmetafont`, their HarfBuzz fork) are **AGPL-3.0** — that's a strong copyleft on the *software*, not the font; using the font file alone (like we did with Amiri) should be fine, but if their font needs their custom HarfBuzz fork (not vanilla HarfBuzz/`uharfbuzz`, which is what `tools/shape-arabic.py` uses) to shape correctly, that AGPL tool would need separate consideration. Unconfirmed.
+- **Text/data source: no clear license found.** The likely pairing is QUL (qul.tarteel.ai, TarteelAI's "Quranic Universal Library") resource "IndoPak Hanafi" (script id 59) + font id 242. QUL's own FAQ: *"resources vary in copyright status... review the licensing information provided by each resource's author before use"* — but no such per-resource license is actually published for these two. An older alternate text source, [marwan/indopak-quran-text](https://github.com/marwan/indopak-quran-text), carries an ad-hoc restriction — *"DO NOT SELL, MANIPULATE, DISTRIBUTE WITHOUT CREDITS OR TAMPER IN ANY FORM OR MANNER"* — which conflicts with our shaping pipeline (it re-encodes text into custom joined glyphs, arguably "tampering").
+- **Confirmation this is a real, unresolved gap, not just something I failed to find:** two *open, unanswered* issues on QUL's own repo (`TarteelAI/quranic-universal-library` #768 and #758, opened 2026-09-24 and 2026-09-18) show other developers asking TarteelAI the *exact* same question — can these resources (including DigitalKhatt fonts) be bundled in a free/commercial offline app, what attribution is needed — with no maintainer reply as of this writing.
+- **Decision (2026-09-26): defer.** Do not build Indo-Pak until either QUL answers those issues, we find/confirm an unambiguously-licensed source, or the user decides to accept the risk and proceed anyway (discussed and explicitly declined for now).
 
 ## Licensing (researched 2026-09-20; not legal advice)
 
@@ -134,11 +149,14 @@ python tools/shape-arabic.py            # add --preview <folder> for a PNG check
 # Put the font on the TouchPad (first time, or after the font changed)
 powershell -ExecutionPolicy Bypass -File tools\install-font.ps1 -RestartLuna
 
-# Package and install (needs the webOS SDK)
+# Package, install and launch (needs the webOS SDK)
 palm-package com.magq.quranreader/ && palm-install com.magq.quranreader_*.ipk
-
-# Launch and watch logs
 palm-launch com.magq.quranreader && palm-log -f com.magq.quranreader
+
+# On webOS CE, the three commands above fail with "unrecognized device version".
+# Use this instead (falls back to novacom+ipkg install / raw luna-send launch /
+# /var/log/messages for logs automatically; plain SDK tools still used first):
+powershell -ExecutionPolicy Bypass -File tools\install-ce.ps1 -Log
 
 # Quick file push (during active development)
 novacom put file:///media/cryptofs/apps/usr/palm/applications/com.magq.quranreader/source/Reader.js \

@@ -38,6 +38,12 @@ var QuranSources = {
         { id: "regular", label: "Regular numbers (1, 2, 3)" }
     ],
 
+    // The first one is the default.
+    themes: [
+        { id: "light", label: "Light" },
+        { id: "dark", label: "Dark" }
+    ],
+
     // Returns the entry with this id, or the first entry if the id is
     // unknown (e.g. a saved setting for a source that no longer exists).
     find: function (list, id) {

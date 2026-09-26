@@ -36,6 +36,7 @@ enyo.kind({
             {caption: "Arabic script", components: QuranMenuItems("script_", QuranSources.scripts, "pickScript", "script")},
             {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation", "translation")},
             {caption: "Verse numbers", components: QuranMenuItems("numbers_", QuranSources.numberStyles, "pickNumbers", "numbers")},
+            {caption: "Theme", components: QuranMenuItems("theme_", QuranSources.themes, "pickTheme", "theme")},
             {caption: "Check for updates", onclick: "checkUpdatesTap"},
             {caption: "About", onclick: "showAbout"}
         ]},
@@ -87,6 +88,7 @@ enyo.kind({
         this.script = QuranSources.find(QuranSources.scripts, QuranPrefs.get("script", null));
         this.translation = QuranSources.find(QuranSources.translations, QuranPrefs.get("translation", null));
         this.numbers = QuranSources.find(QuranSources.numberStyles, QuranPrefs.get("numbers", null));
+        this.theme = QuranSources.find(QuranSources.themes, QuranPrefs.get("theme", null));
         this.position = QuranPrefs.get("position", null);
         if (this.position && !(this.position.surah >= 1 && this.position.surah <= 114 && this.position.ayah >= 1)) {
             this.position = null;
@@ -95,6 +97,7 @@ enyo.kind({
         this.$.reader.setSources(this.script, this.translation, this.numbers);
         this.$.home.setResume(this.position);
         this.updateMenuChecks();
+        this.applyTheme();
     },
 
     // After the first draw, check that the Arabic font is really usable. A new font
@@ -169,6 +172,27 @@ enyo.kind({
         this.$.reader.setSources(this.script, this.translation, this.numbers);
     },
 
+    pickTheme: function (inSender) {
+        this.theme = QuranSources.find(QuranSources.themes, inSender.sourceId);
+        QuranPrefs.set("theme", this.theme.id);
+        this.updateMenuChecks();
+        this.applyTheme();
+    },
+
+    // Toggled on <body>, not on this kind's own root: Enyo's popups (the top menu,
+    // the About/restart dialogs) render into a separate layer that is only a
+    // descendant of <body>, not of this app's own DOM node. Their own chrome (the
+    // Onyx dialog border image) is a fixed light-coloured graphic either way; only
+    // our own content (Home, Reader) actually changes look with the class.
+    applyTheme: function () {
+        var dark = this.theme.id === "dark";
+        var name = "q-dark";
+        var body = document.body;
+        var has = (" " + body.className + " ").indexOf(" " + name + " ") !== -1;
+        if (dark && !has) { body.className += " " + name; }
+        if (!dark && has) { body.className = (" " + body.className + " ").replace(" " + name + " ", " ").replace(/^\s+|\s+$/g, ""); }
+    },
+
     // Ticks the current choice in each submenu and unticks the others.
     updateMenuChecks: function () {
         var self = this;
@@ -183,6 +207,10 @@ enyo.kind({
         QuranSources.numberStyles.forEach(function (n) {
             var item = self.$["numbers_" + n.id];
             if (item) { item.setChecked(n.id === self.numbers.id); }
+        });
+        QuranSources.themes.forEach(function (t) {
+            var item = self.$["theme_" + t.id];
+            if (item) { item.setChecked(t.id === self.theme.id); }
         });
     },
 

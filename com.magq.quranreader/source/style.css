@@ -100,3 +100,37 @@
     text-align: center;
     font-weight: bold;
 }
+
+/* ---- Dark theme ---- */
+/* Applied by toggling a class on <body> (App.js applyTheme/pickTheme), because
+   Enyo's popups (the top menu, the About/restart dialogs) render into a separate
+   DOM layer outside this app's own tree -- only a class on <body> reaches both.
+   System dialog chrome (the Onyx border image) always stays its normal light
+   colour; only our own content below (Home, Reader) actually changes. */
+body.q-dark {
+    background: #1b1a17;
+    color: #e8e3d8;
+}
+body.q-dark .q-row {
+    border-bottom-color: #3a3730;
+}
+body.q-dark .q-num {
+    color: #b9b3a0;
+}
+body.q-dark .q-sub {
+    color: #9d968d;
+}
+body.q-dark .reader-body {
+    background: #1b1a17;
+    color: #e8e3d8;
+}
+body.q-dark .q-ayah {
+    border-bottom-color: #3a3730;
+}
+body.q-dark .q-ar-num,
+body.q-dark .q-en-num {
+    color: #d9b25c;
+}
+body.q-dark .q-status {
+    color: #9d968d;
+}
