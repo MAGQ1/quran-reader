@@ -33,4 +33,12 @@ sed 's/"outbound":\["\*"\]/"outbound":[]/' "/var/palm/ls2/roles/pub/$SVC.json" >
 PID=`ps ax | grep "$SVC" | grep -v grep | awk '{print $1}'`
 [ -n "$PID" ] && kill -9 $PID 2>/dev/null
 
+# The service runs in a jail the system builds on first use and KEEPS (it lives under
+# /var/palm/jail/$SVC, with a bind mount of the service's own folder). An update removes and
+# recreates that folder, so the mount goes stale ("... (deleted)") and the jailer then fails
+# with "failed to mount directory ... No such file or directory" -- the service never starts
+# until a reboot. Unmounting just that one mount lets the jailer mount the new folder next
+# time. Lazy (-l), one fixed path, and NOT rm: the same jail has /media/internal mounted.
+umount -l "/var/palm/jail/$SVC/media/cryptofs/apps/usr/palm/services/$SVC" 2>/dev/null
+
 ls-control scan-services >/dev/null 2>&1
