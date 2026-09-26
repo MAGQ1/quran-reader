@@ -1,0 +1,9 @@
+{
+  "app": "com.magq.quranreader",
+  "id": "com.magq.quranreader",
+  "loc_name": "Quran Reader",
+  "package_format_version": 2,
+  "services": ["com.magq.quranreader.service"],
+  "vendor": "MAGQ",
+  "version": "1.1.0"
+}

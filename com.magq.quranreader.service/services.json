@@ -1,0 +1,33 @@
+{
+	"id": "com.magq.quranreader.service",
+	"description": "Quran Reader recitation fetch service -- downloads verse audio to local storage so <audio> can play a file:// URL (the media element stalls on remote HTTPS fetches on this device)",
+	"activityTimeout": 300,
+	"services": [
+		{
+			"name": "com.magq.quranreader.service",
+			"description": "Quran Reader recitation fetch service (transient: current + next verse only)",
+			"commands": [
+				{
+					"name": "fetchVerse",
+					"assistant": "FetchVerseCommandAssistant",
+					"public": true
+				},
+				{
+					"name": "getFetchStatus",
+					"assistant": "GetFetchStatusCommandAssistant",
+					"public": true
+				},
+				{
+					"name": "releaseVerse",
+					"assistant": "ReleaseVerseCommandAssistant",
+					"public": true
+				},
+				{
+					"name": "clearCache",
+					"assistant": "ClearCacheCommandAssistant",
+					"public": true
+				}
+			]
+		}
+	]
+}

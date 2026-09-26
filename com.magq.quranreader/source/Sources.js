@@ -44,6 +44,26 @@ var QuranSources = {
         { id: "dark", label: "Dark" }
     ],
 
+    // Recitation audio, streamed per-ayah from everyayah.com / VerseByVerseQuran.com
+    // (see CREDITS.txt for the licence terms: free for non-commercial apps, credit
+    // the reciter + site, do not alter the recordings). "folder" is the reciter's
+    // folder name on the site; the file itself is <folder>/<SSSAAA>.mp3.
+    reciters: [
+        { id: "alafasy", label: "Mishary Alafasy", folder: "Alafasy_128kbps" },
+        { id: "husary", label: "Mahmoud Al-Husary", folder: "Husary_128kbps" },
+        { id: "abdulbasit", label: "Abdul Basit (Murattal)", folder: "Abdul_Basit_Murattal_192kbps" }
+    ],
+
+    // Extra silence between verses during continuous playback (on top of
+    // however long the next verse's audio takes to fetch). The first one is
+    // the default -- no extra pause beyond the fetch itself.
+    pauseLengths: [
+        { id: "none", label: "No pause", ms: 0 },
+        { id: "short", label: "Short pause", ms: 700 },
+        { id: "medium", label: "Medium pause", ms: 1500 },
+        { id: "long", label: "Long pause", ms: 3000 }
+    ],
+
     // Returns the entry with this id, or the first entry if the id is
     // unknown (e.g. a saved setting for a source that no longer exists).
     find: function (list, id) {

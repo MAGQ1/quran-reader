@@ -37,12 +37,16 @@ enyo.kind({
             {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation", "translation")},
             {caption: "Verse numbers", components: QuranMenuItems("numbers_", QuranSources.numberStyles, "pickNumbers", "numbers")},
             {caption: "Theme", components: QuranMenuItems("theme_", QuranSources.themes, "pickTheme", "theme")},
+            {caption: "Recitation", components: [
+                {caption: "Reciter", components: QuranMenuItems("reciter_", QuranSources.reciters, "pickReciter", "reciter")},
+                {caption: "Pause between verses", components: QuranMenuItems("pause_", QuranSources.pauseLengths, "pickPauseLength", "pauseLength")}
+            ]},
             {caption: "Check for updates", onclick: "checkUpdatesTap"},
             {caption: "About", onclick: "showAbout"}
         ]},
         {name: "pane", kind: "Pane", flex: 1, components: [
             {name: "home", kind: "QuranHome", onOpenSurah: "openSurah"},
-            {name: "reader", kind: "QuranReader", onBack: "showHome", onProgress: "saveProgress"}
+            {name: "reader", kind: "QuranReader", onBack: "showHome", onProgress: "saveProgress", onAudioError: "readerAudioError"}
         ]},
         {name: "fontDialog", kind: "ModalDialog", caption: "One more step", components: [
             {allowHtml: true, style: "padding: 8px 0;", content:
@@ -70,6 +74,9 @@ enyo.kind({
                 "(<a href=\"#\" class=\"q-link\" data-url=\"http://creativecommons.org/licenses/by-nd/4.0/\">CC BY-ND 4.0</a>), and " +
                 "The Meaning of the Glorious Koran by Marmaduke Pickthall (public domain).<br><br>" +
                 "Arabic font: Amiri Quran, modified as \"Quran Shaped\" (SIL Open Font License 1.1).<br><br>" +
+                "Recitation audio: Mishary Alafasy, Mahmoud Khalil Al-Husary and Abdul Basit Abdul Samad (Murattal), " +
+                "courtesy of <a href=\"#\" class=\"q-link\" data-url=\"https://everyayah.com\">EveryAyah.com</a> and " +
+                "VerseByVerseQuran.com. Fetched one verse at a time and deleted after listening; not modified.<br><br>" +
                 "This app is free and non-commercial.<br><br>" +
                 "Update check: the app asks appcatalog.webosarchive.org whether a newer version exists. " +
                 "It sends the app version, your device model and webOS version, and a random ID made by this app " +
@@ -89,12 +96,14 @@ enyo.kind({
         this.translation = QuranSources.find(QuranSources.translations, QuranPrefs.get("translation", null));
         this.numbers = QuranSources.find(QuranSources.numberStyles, QuranPrefs.get("numbers", null));
         this.theme = QuranSources.find(QuranSources.themes, QuranPrefs.get("theme", null));
+        this.reciter = QuranSources.find(QuranSources.reciters, QuranPrefs.get("reciter", null));
+        this.pauseLength = QuranSources.find(QuranSources.pauseLengths, QuranPrefs.get("pauseLength", null));
         this.position = QuranPrefs.get("position", null);
         if (this.position && !(this.position.surah >= 1 && this.position.surah <= 114 && this.position.ayah >= 1)) {
             this.position = null;
         }
 
-        this.$.reader.setSources(this.script, this.translation, this.numbers);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
         this.$.home.setResume(this.position);
         this.updateMenuChecks();
         this.applyTheme();
@@ -149,27 +158,31 @@ enyo.kind({
         this.$.home.setResume(this.position);
     },
 
+    readerAudioError: function () {
+        this.showMessage("Playback", "This verse's recitation could not be played. Please check your internet connection and try again.");
+    },
+
     // ---- menu ----
 
     pickScript: function (inSender) {
         this.script = QuranSources.find(QuranSources.scripts, inSender.sourceId);
         QuranPrefs.set("script", this.script.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
     },
 
     pickTranslation: function (inSender) {
         this.translation = QuranSources.find(QuranSources.translations, inSender.sourceId);
         QuranPrefs.set("translation", this.translation.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
     },
 
     pickNumbers: function (inSender) {
         this.numbers = QuranSources.find(QuranSources.numberStyles, inSender.sourceId);
         QuranPrefs.set("numbers", this.numbers.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
     },
 
     pickTheme: function (inSender) {
@@ -177,6 +190,20 @@ enyo.kind({
         QuranPrefs.set("theme", this.theme.id);
         this.updateMenuChecks();
         this.applyTheme();
+    },
+
+    pickReciter: function (inSender) {
+        this.reciter = QuranSources.find(QuranSources.reciters, inSender.sourceId);
+        QuranPrefs.set("reciter", this.reciter.id);
+        this.updateMenuChecks();
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
+    },
+
+    pickPauseLength: function (inSender) {
+        this.pauseLength = QuranSources.find(QuranSources.pauseLengths, inSender.sourceId);
+        QuranPrefs.set("pauseLength", this.pauseLength.id);
+        this.updateMenuChecks();
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
     },
 
     // Toggled on <body>, not on this kind's own root: Enyo's popups (the top menu,
@@ -211,6 +238,14 @@ enyo.kind({
         QuranSources.themes.forEach(function (t) {
             var item = self.$["theme_" + t.id];
             if (item) { item.setChecked(t.id === self.theme.id); }
+        });
+        QuranSources.reciters.forEach(function (r) {
+            var item = self.$["reciter_" + r.id];
+            if (item) { item.setChecked(r.id === self.reciter.id); }
+        });
+        QuranSources.pauseLengths.forEach(function (p) {
+            var item = self.$["pause_" + p.id];
+            if (item) { item.setChecked(p.id === self.pauseLength.id); }
         });
     },
 

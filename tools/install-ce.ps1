@@ -14,13 +14,18 @@
 #   powershell -ExecutionPolicy Bypass -File tools\install-ce.ps1              package + install + launch
 #   powershell -ExecutionPolicy Bypass -File tools\install-ce.ps1 -NoLaunch    package + install only
 #   powershell -ExecutionPolicy Bypass -File tools\install-ce.ps1 -Log         ...and tail the log after
+#   powershell -ExecutionPolicy Bypass -File tools\install-ce.ps1 -NoRestart   skip the Luna restart (see below)
+#
+# After an install it restarts Luna (stop/start LunaSysMgr, about 40 seconds) before
+# launching. The device keeps running the OLD app code after a reinstall -- even in a
+# brand-new app process, even though the files on disk are correct -- until Luna is
+# restarted; a full reboot is NOT needed (verified twice in a row with a build-stamp
+# log line). The restart closes every open app on the device.
 #
 # Needs the webOS SDK (novacom, palm-package) on the PATH and the device in
-# Developer Mode. Bump "version" in appinfo.json before re-running against an
-# already-installed app -- ipkg refuses to "upgrade" to a same-or-lower version,
-# same as palm-install.
+# Developer Mode. Reinstalling the same version over itself works.
 
-param([switch]$NoLaunch, [switch]$Log, [switch]$NoInstall)
+param([switch]$NoLaunch, [switch]$Log, [switch]$NoInstall, [switch]$NoRestart)
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
@@ -42,9 +47,16 @@ function Invoke-DeviceScript([string]$Script) {
     } finally { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
 }
 
+$svcDir = Join-Path $root "com.magq.quranreader.service"
+$pkgDir = Join-Path $root "com.magq.quranreader.package"
+$pkgInfo = Get-Content (Join-Path $pkgDir "packageinfo.json") -Raw | ConvertFrom-Json
+if ($pkgInfo.version -ne $info.version) {
+    throw "packageinfo.json version ($($pkgInfo.version)) must match appinfo.json ($($info.version))"
+}
+
 Write-Host "== palm-package"
 Set-Location $root
-palm-package $appDir
+palm-package $pkgDir $appDir $svcDir
 if (-not (Test-Path $ipkPath)) { throw "palm-package did not produce $ipkName" }
 Write-Host ("== {0}  ({1:N1} MB)" -f $ipkName, ((Get-Item $ipkPath).Length / 1MB))
 
@@ -63,6 +75,18 @@ if (-not $NoInstall) {
         Write-Host "== installed via ipkg. First install of a brand-new app id needs a Luna restart"
         Write-Host "   before it shows in the launcher; updating an already-installed app does not."
     }
+
+    # Neither install route runs the package's postinst, and the recitation fetch service is
+    # not callable until it is registered on the Luna bus -- so do that step here (the same
+    # script the release postinst uses). Also stops any old service process from serving stale code.
+    Write-Host "== registering the recitation fetch service on the Luna bus"
+    $register = (Get-Content (Join-Path $PSScriptRoot "release\register-service.sh") -Raw) -replace "@SERVICE_ID@", "$($info.id).service"
+    Invoke-DeviceScript $register | Out-Host
+
+    if (-not $NoRestart) {
+        Write-Host "== restarting Luna so the new code is really the code that runs (about 40 s)"
+        Invoke-DeviceScript "stop LunaSysMgr; sleep 3; start LunaSysMgr; sleep 25" | Out-Null
+    }
 }
 
 if (-not $NoLaunch) {
@@ -73,7 +97,11 @@ if (-not $NoLaunch) {
 
     if (-not $ok) {
         Write-Host "== palm-launch failed - launching via a raw Luna Service call instead"
-        Invoke-DeviceScript "luna-send -n 1 palm://com.palm.applicationManager/launch '{\"id\":\"$($info.id)\"}'"
+        # Built with string concatenation, not "...\"..." escaping: PowerShell double-quoted
+        # strings do not treat a backslash as an escape character, so \" does not actually
+        # escape the quote -- it silently truncates the string mid-way instead.
+        $launchJson = '{"id":"' + $info.id + '"}'
+        Invoke-DeviceScript ("luna-send -n 1 palm://com.palm.applicationManager/launch '" + $launchJson + "'")
     }
 }
 

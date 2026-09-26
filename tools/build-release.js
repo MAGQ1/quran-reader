@@ -17,8 +17,16 @@ var ipk = require("./ipk.js");
 
 var root = path.join(__dirname, "..");
 var appDir = path.join(root, "com.magq.quranreader");
+var serviceDir = path.join(root, "com.magq.quranreader.service");
+var packageDir = path.join(root, "com.magq.quranreader.package");
 var outDir = path.join(root, "dist");
 var appinfo = JSON.parse(fs.readFileSync(path.join(appDir, "appinfo.json"), "utf8"));
+var packageinfo = JSON.parse(fs.readFileSync(path.join(packageDir, "packageinfo.json"), "utf8"));
+if (packageinfo.version !== appinfo.version || packageinfo.id !== appinfo.id) {
+    throw new Error("com.magq.quranreader.package/packageinfo.json (id " + packageinfo.id + ", version " +
+        packageinfo.version + ") must match appinfo.json (id " + appinfo.id + ", version " + appinfo.version + ")");
+}
+var serviceId = appinfo.id + ".service";
 
 if (!/^\d+\.\d+\.\d+$/.test(appinfo.version)) {
     throw new Error("appinfo.json version must be #.#.# (three numbers), got " + appinfo.version);
@@ -37,7 +45,7 @@ var file = path.join(outDir, appinfo.id + "_" + appinfo.version + "_all.ipk");
 if (fs.existsSync(file)) { fs.unlinkSync(file); }
 
 console.log("1. palm-package ...");
-cp.execSync('palm-package -o "' + outDir + '" "' + appDir + '"', { stdio: "inherit" });
+cp.execSync('palm-package -o "' + outDir + '" "' + packageDir + '" "' + appDir + '" "' + serviceDir + '"', { stdio: "inherit" });
 if (!fs.existsSync(file)) { throw new Error("palm-package did not produce " + file); }
 
 console.log("2. adding the install scripts ...");
@@ -48,7 +56,13 @@ members.forEach(function (m) { original[m.name] = m.data; });
 function script(name) {
     var text = fs.readFileSync(path.join(__dirname, "release", name), "utf8");
     // The scripts run on the device: they must have Unix line endings whatever git did.
-    text = text.replace(/\r\n/g, "\n").replace(/@APP_ID@/g, appinfo.id);
+    text = text.replace(/\r\n/g, "\n");
+    // The service registration is one shared file (also used by install-ce.ps1); paste its
+    // body (minus the #! line) where postinst asks for it.
+    var register = fs.readFileSync(path.join(__dirname, "release", "register-service.sh"), "utf8")
+        .replace(/\r\n/g, "\n").replace(/^#!.*\n/, "");
+    text = text.replace("# @REGISTER_SERVICE@", function () { return register; });
+    text = text.replace(/@SERVICE_ID@/g, serviceId).replace(/@APP_ID@/g, appinfo.id);
     return Buffer.from(text, "utf8");
 }
 
@@ -91,9 +105,15 @@ ctl.forEach(function (e) {
     console.log("   control.tar.gz: " + (e.mode & 0o777).toString(8) + "  " + e.name + "  (" + e.data.length + " bytes)");
 });
 var post = ctl.filter(function (e) { return /postinst$/.test(e.name); })[0];
-if (!post || post.mode !== 0o755 || post.data.toString("utf8").indexOf("\r") !== -1 ||
-    post.data.toString("utf8").indexOf("@APP_ID@") !== -1) {
-    throw new Error("postinst is missing, not executable, has Windows line endings or an unfilled placeholder");
+var postText = post ? post.data.toString("utf8") : "";
+if (!post || post.mode !== 0o755 || postText.indexOf("\r") !== -1 ||
+    /@APP_ID@|@SERVICE_ID@|@REGISTER_SERVICE@/.test(postText) || postText.indexOf("ls-control scan-services") === -1) {
+    throw new Error("postinst is missing, not executable, has Windows line endings, an unfilled placeholder, or no service registration");
+}
+var dataNames = ipk.readTarGz(check.filter(function (m) { return m.name === "data.tar.gz"; })[0].data)
+    .map(function (e) { return e.name; }).join("\n");
+if (dataNames.indexOf("services/" + serviceId + "/QuranAudioService.js") === -1) {
+    throw new Error("the service is not inside the package (looked for services/" + serviceId + "/QuranAudioService.js)");
 }
 console.log("\nBuilt " + file + " (" + Math.round(fs.statSync(file).size / 1024) + " KB)");
 console.log("Install it with Preware or WebOS Quick Install - NOT palm-install.");

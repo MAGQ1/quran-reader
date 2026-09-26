@@ -8,6 +8,15 @@ cd /
 
 APP_ID="@APP_ID@"
 DST="/usr/share/fonts/QuranShaped.ttf"
+SVC="@SERVICE_ID@"
+
+# Unregister the recitation fetch service (fixed, absolute paths only).
+rm -f "/var/palm/ls2/services/pub/$SVC" "/var/palm/ls2/services/prv/$SVC" \
+      "/var/palm/ls2/roles/pub/$SVC.json" "/var/palm/ls2/roles/prv/$SVC.json"
+PID=`ps ax | grep "$SVC" | grep -v grep | awk '{print $1}'`
+[ -n "$PID" ] && kill -9 $PID 2>/dev/null
+rm -f /media/internal/.quranaudio_*.mp3 /media/internal/.quranaudio_*.mp3.part
+ls-control scan-services >/dev/null 2>&1   # so the Luna hub forgets the service now, not at next boot
 
 echo "$APP_ID: removing the Arabic font..."
 

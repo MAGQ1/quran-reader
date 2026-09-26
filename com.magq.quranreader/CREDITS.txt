@@ -21,6 +21,14 @@ English translations
   The Meaning of the Glorious Koran by Marmaduke Pickthall (1930), which is in
   the public domain.
 
+Recitation audio
+  Mishary Alafasy, Mahmoud Khalil Al-Husary, and Abdul Basit Abdul Samad
+  (Murattal), courtesy of EveryAyah.com (https://everyayah.com) and
+  VerseByVerseQuran.com. Fetched on demand, one verse at a time (the verse
+  being played and the next one), kept on the device only while listening and
+  then deleted. Free for non-commercial apps offered at no charge; the
+  recordings themselves are never modified or remixed.
+
 Arabic font
   Amiri Quran - Copyright 2010-2022 The Amiri Quran Project Authors
   (https://github.com/aliftype/amiri)

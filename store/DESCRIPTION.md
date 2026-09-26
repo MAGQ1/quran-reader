@@ -1,7 +1,7 @@
 # Quran Reader - App Museum II listing text (draft)
 
 **Name:** Quran Reader
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Author / vendor:** MAGQ
 **Devices:** HP TouchPad (webOS 3.0.5)
 **Price:** Free, no ads
@@ -14,7 +14,9 @@ Read the Quran in Arabic with an English translation, on your TouchPad.
 ## Description
 
 Quran Reader is a free, simple and reliable Quran reader for the HP TouchPad.
-Everything is included in the app, so it works fully offline.
+The Arabic text and translations are included in the app, so reading works
+fully offline; recitation audio is fetched verse by verse as you listen and needs
+an internet connection.
 
 **Reading**
 - The Arabic text in the Uthmani script, with all the vowel marks and stop signs,
@@ -22,7 +24,22 @@ Everything is included in the app, so it works fully offline.
 - The English translation shown under each verse. Choose between Talal Itani's
   modern English (the default) and the classic translation by Marmaduke Pickthall.
 - Choose Arabic-style or regular verse numbers.
+- Light or dark theme.
 - Your reading place is saved, and "Continue reading" takes you straight back.
+
+**Listening**
+- Play a verse's recitation with a tap - either the toolbar Play button (continuing
+  from wherever you're reading) or the small play mark next to any individual verse
+  (plays just that one verse). Continuous playback highlights and scrolls to each
+  verse as it's read, and moves on automatically.
+- Choose your reciter: Mishary Alafasy (default), Mahmoud Khalil Al-Husary, or
+  Abdul Basit Abdul Samad (Murattal).
+- Type a verse number into "Go to verse..." to jump straight there, or into
+  "Play from verse..." to jump there and start listening.
+- Set how long a pause to leave between verses during continuous playback.
+- Recitation is fetched as you listen (and each verse is deleted afterwards), so
+  it needs an internet connection (everything else
+  in the app works fully offline).
 
 **Finding your way**
 - Browse all 114 surahs or the 30 juz, and search surahs by name or number.
@@ -51,12 +68,21 @@ Everything is included in the app, so it works fully offline.
 - English translations: Translation by Talal Itani, ClearQuran.com (CC BY-ND 4.0),
   and The Meaning of the Glorious Koran by Marmaduke Pickthall (public domain).
 - Arabic font: Amiri Quran (SIL Open Font License 1.1), modified as "Quran Shaped".
+- Recitation audio: Mishary Alafasy, Mahmoud Khalil Al-Husary, and Abdul Basit
+  Abdul Samad (Murattal), courtesy of EveryAyah.com and VerseByVerseQuran.com.
 - Update checker: webos-common by Jon W (MIT).
 - Quran Reader's own source code: MIT License, Copyright (c) 2026 MAGQ.
 
 All praise is due to Allah, the Most High.
 
 ## Changelog
+
+### 1.1.0
+
+- Dark theme
+- Verse recitation, with the verse being read highlighted on screen. Choose
+  from three reciters. Play from the toolbar, from a single verse, or jump to
+  a verse number and continue listening from there
 
 ### 1.0.0
 

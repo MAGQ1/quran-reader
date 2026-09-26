@@ -14,6 +14,11 @@
 cd /
 
 APP_ID="@APP_ID@"
+
+# First: register the recitation fetch service (tools/release/register-service.sh,
+# pasted in here by build-release.js). Before the font steps, because those exit early.
+# @REGISTER_SERVICE@
+
 SRC="/media/cryptofs/apps/usr/palm/applications/$APP_ID/fonts/QuranShaped.ttf"
 DST="/usr/share/fonts/QuranShaped.ttf"
 

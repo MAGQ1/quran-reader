@@ -100,6 +100,57 @@
     text-align: center;
     font-weight: bold;
 }
+/* "Go to verse..." and "Play from verse..." boxes in the toolbar; without a width
+   they stretch like the other flex:1 toolbar controls (same issue as .q-mode
+   buttons above), and too narrow a width clips the hint text (each hint needs its
+   own width: "Play from verse..." lost its last period at 160px). */
+.q-goto,
+.q-play-verse {
+    width: 160px !important;
+    -webkit-box-flex: 0 !important;
+}
+.q-play-verse {
+    width: 195px !important;
+}
+/* Groups the Play/Pause button with its verse box so the pair reads as one
+   "audio" control, distinct from the plain Back/Previous/Next buttons. */
+.q-audio-group {
+    padding: 0 6px;
+    margin: 0 4px;
+    border-left: 1px solid #c8bfa0;
+    border-right: 1px solid #c8bfa0;
+}
+.q-audio-group .enyo-button {
+    min-width: 40px;
+}
+/* The Pause icon: two solid bars drawn with CSS (no font on the device has a filled
+   pause glyph -- the block characters came out hollow). Inline-block spans, so they sit
+   centered like text does. */
+.q-bar {
+    display: inline-block;
+    width: 5px;
+    height: 16px;
+    margin: 0 2px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;   /* vertical-align: middle sat them low (0) and -3px too high on the device */
+    background-color: #333;
+}
+.q-play-ayah,
+.q-play-continue {
+    float: left;
+    margin-right: 10px;
+    font-size: 20px;
+    line-height: 1;
+    color: #7a6a3a;
+    text-decoration: none;
+}
+.q-play-continue {
+    font-size: 15px;
+}
+.q-playing {
+    background: #f2e6bc;
+}
 
 /* ---- Dark theme ---- */
 /* Applied by toggling a class on <body> (App.js applyTheme/pickTheme), because
@@ -133,4 +184,15 @@ body.q-dark .q-en-num {
 }
 body.q-dark .q-status {
     color: #9d968d;
+}
+body.q-dark .q-play-ayah,
+body.q-dark .q-play-continue {
+    color: #d9b25c;
+}
+body.q-dark .q-playing {
+    background: #3a3322;
+}
+body.q-dark .q-audio-group {
+    border-left-color: #3a3730;
+    border-right-color: #3a3730;
 }
