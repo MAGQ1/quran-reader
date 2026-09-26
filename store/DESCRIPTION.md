@@ -13,7 +13,7 @@ Read the Quran in Arabic with an English translation, on your TouchPad.
 
 ## Description
 
-Quran Reader is a free, simple and reliable Quran reader for the HP TouchPad.
+Quran Reader is a free, simple, and reliable Quran reader for the HP TouchPad.
 The Arabic text and translations are included in the app, so reading works
 fully offline; recitation audio is fetched verse by verse as you listen and needs
 an internet connection.

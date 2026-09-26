@@ -22,6 +22,8 @@ Updater Helper - Enyo
   4. Declared the variables the original leaked as globals (locale, versionNumParts).
   5. The web address grew on every check (it overwrote its own base address); it now keeps
      the base address and builds each request from it.
+  6. The update prompt no longer shows the museum's version note. It says "Version X is
+     available (you have Y)" using the version numbers instead (see PromptUserForUpdate).
 */
 
 enyo.kind({
@@ -61,10 +63,14 @@ enyo.kind({
         if (this.LastUpdateResponse == null) {
             enyo.log("Updater Helper: Not prompting user for update when no update has been discovered.");
         } else {
-            if (!message)
-                message = "An update for this app was found in App Museum II:<br><br>" + this.VersionNote + "<br><br>Do you want to update now?";
-            else
-                message = "An update for this app was found in App Museum II:<br><br>" + message + "<br><br>Do you want to update now?";
+            // The version note the museum sends is deliberately NOT shown (LOCAL CHANGE 6): the
+            // listing's changelog field is long, and only its last line came back -- an old bullet
+            // point. The prompt says which version is available instead. The versions come from
+            // the server, so they are escaped before going into the HTML message.
+            var newVersion = enyo.string.escapeHtml(String(this.LastUpdateResponse.version));
+            var oldVersion = "?";
+            try { oldVersion = enyo.string.escapeHtml(String(enyo.fetchAppInfo().version)); } catch (e) { /* leave the ? */ }
+            message = "Version " + newVersion + " is available (you have " + oldVersion + ").<br><br>Do you want to update now?";
             this.$.updateMsg.setContent(message);
             this.$.updatePopUp.openAtCenter();
         }
