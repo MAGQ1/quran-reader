@@ -184,6 +184,9 @@ enyo.kind({
                 // plays from this verse onward; q-play-ayah plays just this verse.
                 '<a href="#" class="q-play-continue" data-ayah="' + n + '" title="Play from here onward">▶▼</a>' +
                 '<a href="#" class="q-play-ayah" data-ayah="' + n + '" title="Play just this verse">▶</a>' +
+                // The bookmark ribbon (drawn in CSS, see .q-ribbon); q-marked when bookmarked.
+                '<a href="#" class="q-bookmark' + (QuranBookmarks.has(self.surah, n) ? ' q-marked' : '') +
+                    '" data-bookmark="' + n + '" title="Bookmark this verse"><span class="q-ribbon"></span></a>' +
                 '<div class="q-ar"' + font + '>' + self.escapeHtml(text) +
                 ' <span class="q-ar-num">﴾' + (self.numbers.id === "regular" ? n : self.arabicDigits(n)) + '﴿</span></div>' +
                 '<div class="q-en"><span class="q-en-num">' + n + '.</span> ' + self.escapeHtml(english[i] || "") + '</div>' +
@@ -234,8 +237,18 @@ enyo.kind({
 
     // A verse's own play links: the plain triangle plays just that ayah; the
     // triangle-with-down-arrow plays from that ayah onward (continuous).
+    // The bookmark ribbon next to each verse toggles that verse's bookmark.
     bodyClick: function (inSender, inEvent) {
         var el = inEvent && inEvent.target;
+        // A tap on the ribbon itself lands on the inner span; its link is the parent.
+        var mark = el && el.className === "q-ribbon" ? el.parentNode : el;
+        var bm = mark && mark.getAttribute && mark.getAttribute("data-bookmark");
+        if (bm) {
+            if (inEvent.preventDefault) { inEvent.preventDefault(); }
+            var on = QuranBookmarks.toggle(this.surah, parseInt(bm, 10));
+            mark.className = "q-bookmark" + (on ? " q-marked" : "");
+            return;
+        }
         var ayah = el && el.getAttribute && el.getAttribute("data-ayah");
         if (ayah) {
             if (inEvent.preventDefault) { inEvent.preventDefault(); }

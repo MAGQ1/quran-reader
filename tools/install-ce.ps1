@@ -9,7 +9,9 @@
 #   logs     -> tail /var/log/messages instead of palm-log (same enyo-build.js
 #               lines show up there, tagged {LunaSysMgrJS} and with the app id)
 # On a normal (non-CE) device the plain SDK tools just work and this script never
-# falls back to any of that.
+# falls back to any of that. Since 2026-10-11 the PC has PalmSDK 0.4 (Redux), whose
+# palm-install / palm-launch / palm-log accept CE too, so the fallbacks are not
+# normally used any more; they are kept for machines with the old HP SDK.
 #
 #   powershell -ExecutionPolicy Bypass -File tools\install-ce.ps1              package + install + launch
 #   powershell -ExecutionPolicy Bypass -File tools\install-ce.ps1 -NoLaunch    package + install only
@@ -28,6 +30,12 @@
 param([switch]$NoLaunch, [switch]$Log, [switch]$NoInstall, [switch]$NoRestart)
 
 $ErrorActionPreference = "Stop"
+# The PalmSDK 0.4 (Redux) installer puts palm-* on the PATH but not novacom.exe,
+# which lives with the novacomd driver in "C:\Program Files\Palm, Inc".
+if (-not (Get-Command novacom -ErrorAction SilentlyContinue)) {
+    $nova = "C:\Program Files\Palm, Inc"
+    if (Test-Path (Join-Path $nova "novacom.exe")) { $env:Path = "$nova;$env:Path" }
+}
 $root = Split-Path -Parent $PSScriptRoot
 $appDir = Join-Path $root "com.magq.quranreader"
 $info = Get-Content (Join-Path $appDir "appinfo.json") -Raw | ConvertFrom-Json

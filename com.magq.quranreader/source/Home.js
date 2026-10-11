@@ -1,4 +1,5 @@
-// Home screen: browse and search surahs or juz, and resume where you left off.
+// Home screen: browse and search surahs or juz, see bookmarks, and resume where
+// you left off.
 
 enyo.kind({
     name: "QuranHome",
@@ -19,13 +20,16 @@ enyo.kind({
         {kind: "HFlexBox", className: "q-controls", align: "center", components: [
             {name: "modeGroup", kind: "RadioGroup", className: "q-mode", onChange: "modeChange", components: [
                 {caption: "Surahs"},
-                {caption: "Juz"}
+                {caption: "Juz"},
+                {caption: "Bookmarks"}
             ]},
             {name: "searchBox", kind: "InputBox", flex: 1, style: "margin-left: 12px;", components: [
                 {name: "search", kind: "Input", flex: 1, hint: "Search surahs", changeOnInput: true, onchange: "searchChange"}
             ]}
         ]},
         {name: "resumeButton", kind: "Button", className: "enyo-button-blue", showing: false, onclick: "resumeTap"},
+        {name: "noBookmarks", className: "q-status", showing: false, allowHtml: true, content:
+            "No bookmarks yet.<br>Tap the ribbon beside a verse to bookmark it."},
         {name: "list", kind: "VirtualList", flex: 1, onSetupRow: "setupRow", components: [
             {name: "row", kind: "Item", className: "q-row", layoutKind: "HFlexLayout", onclick: "rowTap", components: [
                 {name: "num", className: "q-num"},
@@ -33,14 +37,20 @@ enyo.kind({
                     {name: "title"},
                     {name: "sub", className: "q-sub"}
                 ]},
-                {name: "arabic", className: "q-arabic"}
+                {name: "arabic", className: "q-arabic"},
+                // Only shown on the Bookmarks list; rowTap checks for its class. The row
+                // stretches its children to full height, so the button sits in a box
+                // that centres it vertically at its own size.
+                {name: "removeBox", kind: "VFlexBox", pack: "center", components: [
+                    {kind: "Button", className: "enyo-button-negative q-remove", caption: "Remove"}
+                ]}
             ]}
         ]}
     ],
 
     create: function () {
         this.inherited(arguments);
-        this.mode = "surah";   // "surah" or "juz"
+        this.mode = "surah";   // "surah", "juz" or "bookmarks"
         this.surahs = [];
         this.shapedNames = [];
         this.juz = [];
@@ -80,6 +90,9 @@ enyo.kind({
     updateItems: function () {
         if (this.mode === "juz") {
             this.items = this.juz;
+        } else if (this.mode === "bookmarks") {
+            var surahs = this.surahs;
+            this.items = QuranBookmarks.all().filter(function (b) { return !!surahs[b.surah - 1]; });
         } else {
             var q = this.normalize(this.$.search.getValue() || "");
             var self = this;
@@ -91,13 +104,27 @@ enyo.kind({
                     self.normalize(s.ar).indexOf(q) !== -1;
             });
         }
+        this.$.noBookmarks.setShowing(this.mode === "bookmarks" && this.items.length === 0);
         this.$.list.reset();
+    },
+
+    // Called when the home screen comes back into view: bookmarks may have changed
+    // in the reader.
+    refreshBookmarks: function () {
+        if (this.mode === "bookmarks") { this.updateItems(); }
     },
 
     setupRow: function (inSender, inIndex) {
         if (inIndex < 0 || inIndex >= this.items.length) { return false; }
         var it = this.items[inIndex];
-        if (this.mode === "juz") {
+        this.$.removeBox.setShowing(this.mode === "bookmarks");
+        if (this.mode === "bookmarks") {
+            var s = this.surahs[it.surah - 1];
+            this.$.num.setContent(it.surah);
+            this.$.title.setContent(s.en + " " + it.surah + ":" + it.ayah);
+            this.$.sub.setContent(s.tr + " · verse " + it.ayah + " of " + s.count);
+            this.$.arabic.setContent(this.shapedNames[it.surah - 1] || "");
+        } else if (this.mode === "juz") {
             var start = this.surahs[it.surah - 1];
             this.$.num.setContent(it.juz);
             this.$.title.setContent("Juz " + it.juz);
@@ -115,9 +142,9 @@ enyo.kind({
     // ---- user actions ----
 
     modeChange: function (inSender) {
-        this.mode = (inSender.getValue() === 1) ? "juz" : "surah";
+        this.mode = ["surah", "juz", "bookmarks"][inSender.getValue()] || "surah";
         // Hide it without removing it, so the row keeps its height and the buttons
-        // beside it do not jump when switching between Surahs and Juz.
+        // beside it do not jump when switching between the tabs.
         this.$.searchBox.applyStyle("visibility", this.mode === "surah" ? "visible" : "hidden");
         this.updateItems();
     },
@@ -129,11 +156,27 @@ enyo.kind({
     rowTap: function (inSender, inEvent) {
         var it = this.items[inEvent.rowIndex];
         if (!it) { return; }
-        if (this.mode === "juz") {
+        if (this.mode === "bookmarks") {
+            if (this.tappedRemove(inEvent.target)) {
+                QuranBookmarks.remove(it.surah, it.ayah);
+                this.updateItems();
+            } else {
+                this.doOpenSurah(it.surah, it.ayah);
+            }
+        } else if (this.mode === "juz") {
             this.doOpenSurah(it.surah, it.ayah);
         } else {
             this.doOpenSurah(it.n, 1);
         }
+    },
+
+    // True if the tap landed on a row's Remove button. The tap can land on an element
+    // inside the button, so look a few levels up for its q-remove class.
+    tappedRemove: function (el) {
+        for (var i = 0; el && i < 4; i++, el = el.parentNode) {
+            if ((" " + el.className + " ").indexOf(" q-remove ") !== -1) { return true; }
+        }
+        return false;
     },
 
     // ---- "Continue reading" button ----

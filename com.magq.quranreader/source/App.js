@@ -149,6 +149,7 @@ enyo.kind({
     },
 
     showHome: function () {
+        this.$.home.refreshBookmarks();
         this.$.pane.selectView(this.$.home);
     },
 
