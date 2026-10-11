@@ -4,9 +4,10 @@ Quran Reader by MAGQ - credits and licenses
 This app is free and non-commercial.
 
 Arabic text (Uthmani script)
-  Tanzil Quran Text - Copyright (C) 2007-2021 Tanzil Project
+  Tanzil Quran Text (Uthmani, Version 1.1) - Copyright (C) 2007-2026 Tanzil Project
   https://tanzil.net - Creative Commons Attribution 3.0
-  Obtained through api.alquran.cloud (edition "quran-uthmani").
+  Downloaded from tanzil.net, with Tanzil's own options: pause marks, sajdah
+  and rub el hizb signs, and tatweel below superscript alefs.
   The text may not be changed, and it is kept unchanged inside the app. The
   only difference from the source is that the Bismillah, which the source
   attaches to the first verse of most surahs, is shown as a separate heading.
