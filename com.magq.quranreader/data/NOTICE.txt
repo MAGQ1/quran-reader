@@ -56,3 +56,16 @@ The Meaning of the Glorious Koran, by Mohammed Marmaduke Pickthall (1930).
 This work is in the public domain: it was published before 1 January 1931,
 and its translator died in 1936.
 Obtained through api.alquran.cloud (edition "en.pickthall").
+
+
+TRANSLITERATION -- translit/
+------------------------------------------------------------------------------
+"English Transliteration" (ID en.transliteration, last updated
+6 September 2010), from the Tanzil Project: https://tanzil.net/trans/
+Tanzil's header block for it, exactly as it came with the download, is in
+TANZIL-HEADER-translit.txt.
+Terms of the Tanzil translations page: "The translations provided at this
+page are for non-commercial purposes only." This app is free and
+non-commercial.
+The files are used unchanged, including their formatting marks; the app
+draws <u>, <b>/<strong> and <i> as underline, bold and italic.

@@ -52,6 +52,7 @@ enyo.kind({
         this.numbers = QuranSources.numberStyles[0];
         this.reciter = QuranSources.reciters[0];
         this.pauseLength = QuranSources.pauseLengths[0];
+        this.translit = QuranSources.transliterations[0];
         this.playing = false;   // true while a verse is playing or between verses
         this.playAyah = 0;      // the verse currently playing
         this.playSingle = false; // true if the current play is "just this one ayah"
@@ -107,14 +108,15 @@ enyo.kind({
     },
 
     // Called by the app when the user picks another script, translation, number
-    // style, reciter or pause length. Redraws the current surah and keeps the
+    // style, reciter, pause length or transliteration setting. Redraws the current surah and keeps the
     // reader at the same verse.
-    setSources: function (script, translation, numbers, reciter, pauseLength) {
+    setSources: function (script, translation, numbers, reciter, pauseLength, translit) {
         this.script = script;
         this.translation = translation;
         this.numbers = numbers || QuranSources.numberStyles[0];
         this.reciter = reciter || QuranSources.reciters[0];
         this.pauseLength = pauseLength || QuranSources.pauseLengths[0];
+        this.translit = translit || QuranSources.transliterations[0];
         if (this.surah) { this.load(this.surah, this.topAyah); }
     },
 
@@ -139,19 +141,22 @@ enyo.kind({
         this.$.body.setContent('<div class="q-status">Loading…</div>');
         this.$.scroller.setScrollTop(0);
 
-        QuranData.loadMany([
+        var files = [
             {url: "data/surahs.json", cache: true},
             {url: this.script.shapedExtra, cache: true},
             {url: this.script.shapedFolder + "/" + file, cache: false},
             {url: this.translation.folder + "/" + file, cache: false}
-        ], function (err, results) {
+        ];
+        // Only loaded when switched on; results[4] is then the transliteration.
+        if (this.translit.folder) { files.push({url: this.translit.folder + "/" + file, cache: false}); }
+        QuranData.loadMany(files, function (err, results) {
             if (token !== self.token) { return; }   // user moved on; ignore
             if (err) {
                 enyo.error("Could not load surah " + surah + ": " + err);
                 self.$.body.setContent('<div class="q-status">This surah could not be loaded.</div>');
                 return;
             }
-            self.draw(results[0][surah - 1], results[1].bismillah, results[2], results[3], ayah);
+            self.draw(results[0][surah - 1], results[1].bismillah, results[2], results[3], results[4] || null, ayah);
         });
     },
 
@@ -164,7 +169,19 @@ enyo.kind({
         return String(n).replace(/[0-9]/g, function (d) { return digits.charAt(d); });
     },
 
-    draw: function (meta, bismillah, arabic, english, ayah) {
+    // Tanzil's transliteration marks letters with <u> (long vowels, heavy letters),
+    // <b>/<strong> (silent, or dropped when stopping) and <i> (with <u>th</u>: the
+    // letter dha). Everything is escaped first and only those exact tags are turned
+    // back into styled spans, so nothing else in the file can become HTML.
+    // (tools/build-data.js checks that the tags are balanced.)
+    formatTranslit: function (text) {
+        var classes = {u: "q-tr-u", b: "q-tr-b", strong: "q-tr-b", i: "q-tr-i"};
+        return this.escapeHtml(text).replace(/&lt;(\/?)(u|b|i|strong)&gt;/gi, function (m, close, name) {
+            return close ? "</span>" : '<span class="' + classes[name.toLowerCase()] + '">';
+        });
+    },
+
+    draw: function (meta, bismillah, arabic, english, translit, ayah) {
         var self = this;
         var font = this.script.fontFamily ? ' style="font-family:' + this.escapeHtml(this.script.fontFamily) + '"' : "";
         var html = [];
@@ -189,6 +206,7 @@ enyo.kind({
                     '" data-bookmark="' + n + '" title="Bookmark this verse"><span class="q-ribbon"></span></a>' +
                 '<div class="q-ar"' + font + '>' + self.escapeHtml(text) +
                 ' <span class="q-ar-num">﴾' + (self.numbers.id === "regular" ? n : self.arabicDigits(n)) + '﴿</span></div>' +
+                (translit ? '<div class="q-tr">' + self.formatTranslit(translit[i] || "") + '</div>' : '') +
                 '<div class="q-en"><span class="q-en-num">' + n + '.</span> ' + self.escapeHtml(english[i] || "") + '</div>' +
                 '</div>'
             );

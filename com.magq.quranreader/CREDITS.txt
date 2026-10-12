@@ -23,6 +23,11 @@ English translations
   The Meaning of the Glorious Koran by Marmaduke Pickthall (1930), which is in
   the public domain.
 
+Transliteration
+  "English Transliteration" from the Tanzil Project (https://tanzil.net/trans/),
+  used unchanged. Tanzil's translations are for non-commercial use only; this
+  app is free and non-commercial. Full notice: data/NOTICE.txt
+
 Recitation audio
   Mishary Alafasy, Mahmoud Khalil Al-Husary, and Abdul Basit Abdul Samad
   (Murattal), courtesy of EveryAyah.com (https://everyayah.com) and

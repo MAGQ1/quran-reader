@@ -35,6 +35,7 @@ enyo.kind({
         {kind: "AppMenu", components: [
             {caption: "Arabic script", components: QuranMenuItems("script_", QuranSources.scripts, "pickScript", "script")},
             {caption: "Translation", components: QuranMenuItems("translation_", QuranSources.translations, "pickTranslation", "translation")},
+            {caption: "Transliteration", components: QuranMenuItems("translit_", QuranSources.transliterations, "pickTranslit", "translit")},
             {caption: "Verse numbers", components: QuranMenuItems("numbers_", QuranSources.numberStyles, "pickNumbers", "numbers")},
             {caption: "Theme", components: QuranMenuItems("theme_", QuranSources.themes, "pickTheme", "theme")},
             {caption: "Recitation", components: [
@@ -73,6 +74,11 @@ enyo.kind({
                 "English translations: <a href=\"#\" class=\"q-link\" data-url=\"https://www.clearquran.com\">Translation by Talal Itani, ClearQuran.com</a> " +
                 "(<a href=\"#\" class=\"q-link\" data-url=\"http://creativecommons.org/licenses/by-nd/4.0/\">CC BY-ND 4.0</a>), and " +
                 "The Meaning of the Glorious Koran by Marmaduke Pickthall (public domain).<br><br>" +
+                "Transliteration: \"English Transliteration\" from the " +
+                "<a href=\"#\" class=\"q-link\" data-url=\"https://tanzil.net/trans/\">Tanzil Project</a> " +
+                "(non-commercial use). How to read it: <u>underlined</u> letters are long vowels or heavy letters; " +
+                "<b>bold</b> letters are silent, or dropped when you stop at that word; an underlined <i><u>th</u></i> " +
+                "in italics is the letter dha; AA stands for the letter ayn.<br><br>" +
                 "Arabic font: Amiri Quran, modified as \"Quran Shaped\" (SIL Open Font License 1.1).<br><br>" +
                 "Recitation audio: Mishary Alafasy, Mahmoud Khalil Al-Husary and Abdul Basit Abdul Samad (Murattal), " +
                 "courtesy of <a href=\"#\" class=\"q-link\" data-url=\"https://everyayah.com\">EveryAyah.com</a> and " +
@@ -98,12 +104,13 @@ enyo.kind({
         this.theme = QuranSources.find(QuranSources.themes, QuranPrefs.get("theme", null));
         this.reciter = QuranSources.find(QuranSources.reciters, QuranPrefs.get("reciter", null));
         this.pauseLength = QuranSources.find(QuranSources.pauseLengths, QuranPrefs.get("pauseLength", null));
+        this.translit = QuranSources.find(QuranSources.transliterations, QuranPrefs.get("translit", null));
         this.position = QuranPrefs.get("position", null);
         if (this.position && !(this.position.surah >= 1 && this.position.surah <= 114 && this.position.ayah >= 1)) {
             this.position = null;
         }
 
-        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength, this.translit);
         this.$.home.setResume(this.position);
         this.updateMenuChecks();
         this.applyTheme();
@@ -169,21 +176,28 @@ enyo.kind({
         this.script = QuranSources.find(QuranSources.scripts, inSender.sourceId);
         QuranPrefs.set("script", this.script.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength, this.translit);
     },
 
     pickTranslation: function (inSender) {
         this.translation = QuranSources.find(QuranSources.translations, inSender.sourceId);
         QuranPrefs.set("translation", this.translation.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength, this.translit);
+    },
+
+    pickTranslit: function (inSender) {
+        this.translit = QuranSources.find(QuranSources.transliterations, inSender.sourceId);
+        QuranPrefs.set("translit", this.translit.id);
+        this.updateMenuChecks();
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength, this.translit);
     },
 
     pickNumbers: function (inSender) {
         this.numbers = QuranSources.find(QuranSources.numberStyles, inSender.sourceId);
         QuranPrefs.set("numbers", this.numbers.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength, this.translit);
     },
 
     pickTheme: function (inSender) {
@@ -197,14 +211,14 @@ enyo.kind({
         this.reciter = QuranSources.find(QuranSources.reciters, inSender.sourceId);
         QuranPrefs.set("reciter", this.reciter.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength, this.translit);
     },
 
     pickPauseLength: function (inSender) {
         this.pauseLength = QuranSources.find(QuranSources.pauseLengths, inSender.sourceId);
         QuranPrefs.set("pauseLength", this.pauseLength.id);
         this.updateMenuChecks();
-        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength);
+        this.$.reader.setSources(this.script, this.translation, this.numbers, this.reciter, this.pauseLength, this.translit);
     },
 
     // Toggled on <body>, not on this kind's own root: Enyo's popups (the top menu,
@@ -231,6 +245,10 @@ enyo.kind({
         QuranSources.translations.forEach(function (t) {
             var item = self.$["translation_" + t.id];
             if (item) { item.setChecked(t.id === self.translation.id); }
+        });
+        QuranSources.transliterations.forEach(function (t) {
+            var item = self.$["translit_" + t.id];
+            if (item) { item.setChecked(t.id === self.translit.id); }
         });
         QuranSources.numberStyles.forEach(function (n) {
             var item = self.$["numbers_" + n.id];

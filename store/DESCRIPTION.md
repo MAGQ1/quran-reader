@@ -23,6 +23,7 @@ an internet connection.
   with all the vowel marks and stop signs, properly joined and laid out for the TouchPad.
 - The English translation shown under each verse. Choose between Talal Itani's
   modern English (the default) and the classic translation by Marmaduke Pickthall.
+- An optional transliteration line under the Arabic (Tanzil's English transliteration).
 - Choose Arabic-style or regular verse numbers.
 - Light or dark theme.
 - Your reading place is saved, and "Continue reading" takes you straight back.
@@ -67,6 +68,8 @@ an internet connection.
 - Arabic text: Tanzil Project (tanzil.net), Creative Commons Attribution 3.0.
 - English translations: Translation by Talal Itani, ClearQuran.com (CC BY-ND 4.0),
   and The Meaning of the Glorious Koran by Marmaduke Pickthall (public domain).
+- Transliteration: "English Transliteration" from the Tanzil Project (tanzil.net),
+  for non-commercial use.
 - Arabic font: Amiri Quran (SIL Open Font License 1.1), modified as "Quran Shaped".
 - Recitation audio: Mishary Alafasy, Mahmoud Khalil Al-Husary, and Abdul Basit
   Abdul Samad (Murattal), courtesy of EveryAyah.com and VerseByVerseQuran.com.

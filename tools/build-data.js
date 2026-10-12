@@ -14,6 +14,12 @@
 //    other (seen on the device in 36:9, 36:23, 36:58 ...). It is used verbatim.
 //    (Until 2026-10-11 the Arabic came from Al Quran Cloud, an older Tanzil 1.0.x
 //    copy without the tatweels or Tanzil's 2021 corrections.)
+//  - The English transliteration is Tanzil's own (TANZIL_TRANSLATIONS, from
+//    tanzil.net/trans/), used verbatim, including its <u> <b> <i> formatting marks
+//    (Reader.js draws only those as formatting). Tanzil's terms for its translations:
+//    non-commercial use only -- this app is free and non-commercial. The similar
+//    "en.transliteration" on Al Quran Cloud is a DIFFERENT text with no known author
+//    or licence; do not use it.
 //  - Surah names, revelation types, juz boundaries and Marmaduke Pickthall's
 //    translation (public domain) come from api.alquran.cloud.
 // Talal Itani's translation (CC BY-ND 4.0) does NOT: this script does not
@@ -45,6 +51,30 @@ var TANZIL_SCRIPTS = [
     { type: 'uthmani', folder: 'uthmani', title: 'Tanzil Quran Text (Uthmani' },
     { type: 'simple',  folder: 'simple',  title: 'Tanzil Quran Text (Simple' }
 ];
+
+// Translations taken from Tanzil itself: data/<folder>/NNN.json, header in
+// data/TANZIL-HEADER-<folder>.txt.
+var TANZIL_TRANSLATIONS = [
+    { id: 'en.transliteration', folder: 'translit' }
+];
+
+function tanzilTransUrl(id) {
+    return 'https://tanzil.net/trans/?transID=' + id + '&type=txt-2';
+}
+
+// The only markup allowed in a Tanzil transliteration; anything else stops the build.
+var TRANSLIT_TAGS = /<(\/?)(u|b|i|strong)>/gi;
+
+function checkMarkup(text, where) {
+    var stack = [];
+    var rest = text.replace(TRANSLIT_TAGS, function (m, close, name) {
+        name = name.toLowerCase();
+        if (!close) { stack.push(name); } else { check(stack.pop() === name, 'unbalanced <' + name + '> at ' + where); }
+        return '';
+    });
+    check(stack.length === 0, 'unclosed tag at ' + where);
+    check(!/[<>&]/.test(rest), 'unexpected markup at ' + where);
+}
 
 function tanzilUrl(type) {
     return 'https://tanzil.net/pub/download/index.php?quranType=' + type + '&outType=txt-2' +
@@ -120,6 +150,10 @@ function finish(results) {
 
     // Each script's Bismillah, taken from its own first verse of Al-Fatiha.
     var bismillahs = {};
+    TANZIL_TRANSLATIONS.forEach(function (tr) {
+        check(tanzil[tr.folder].count === 6236, tr.id + ': expected 6236 verses, got ' + tanzil[tr.folder].count);
+        check(tanzil[tr.folder].header.join('\n').indexOf('ID: ' + tr.id) !== -1, tr.id + ': Tanzil header not found');
+    });
     TANZIL_SCRIPTS.forEach(function (sc) {
         var t = tanzil[sc.folder];
         check(t.count === 6236, sc.type + ': expected 6236 Tanzil verses, got ' + t.count);
@@ -166,6 +200,17 @@ function finish(results) {
             writeJson(path.join(OUT, sc.folder, pad3(s.number) + '.json'), arabic);
         });
 
+        TANZIL_TRANSLATIONS.forEach(function (tr) {
+            var lines = s.ayahs.map(function (a, ai) {
+                var where = tr.id + ' ' + s.number + ':' + (ai + 1);
+                var t = tanzil[tr.folder].verses[s.number + ':' + (ai + 1)];
+                check(t !== undefined && t.length > 0, 'missing ' + where);
+                checkMarkup(t, where);
+                return t;
+            });
+            writeJson(path.join(OUT, tr.folder, pad3(s.number) + '.json'), lines);
+        });
+
         TRANSLATIONS.forEach(function (folder) {
             var english = results[folder][si].ayahs.map(function (a, ai) {
                 check(a.text.length > 0, folder + ': empty English text at ' + s.number + ':' + (ai + 1));
@@ -198,7 +243,7 @@ function finish(results) {
     writeJson(path.join(OUT, 'juz.json'), juz);
     writeJson(path.join(OUT, 'bismillah.json'), bismillahs);
     // Tanzil asks for its copyright block to go with every copy of the text.
-    TANZIL_SCRIPTS.forEach(function (sc) {
+    TANZIL_SCRIPTS.concat(TANZIL_TRANSLATIONS).forEach(function (sc) {
         fs.writeFileSync(path.join(OUT, 'TANZIL-HEADER-' + sc.folder + '.txt'),
             tanzil[sc.folder].header.join('\n') + '\n', 'utf8');
     });
@@ -209,10 +254,11 @@ function finish(results) {
 
 // Downloads every Tanzil script in turn, then the Al Quran Cloud editions.
 function downloadTanzil(i, acc) {
-    if (i === TANZIL_SCRIPTS.length) { return build(EDITIONS, 0, { tanzil: acc }); }
-    var sc = TANZIL_SCRIPTS[i];
-    console.log('Downloading the ' + sc.type + ' text from tanzil.net ...');
-    getRaw(tanzilUrl(sc.type), function (err, raw) {
+    var all = TANZIL_SCRIPTS.concat(TANZIL_TRANSLATIONS);
+    if (i === all.length) { return build(EDITIONS, 0, { tanzil: acc }); }
+    var sc = all[i];
+    console.log('Downloading ' + (sc.type || sc.id) + ' from tanzil.net ...');
+    getRaw(sc.type ? tanzilUrl(sc.type) : tanzilTransUrl(sc.id), function (err, raw) {
         check(!err, err && err.message);
         acc[sc.folder] = parseTanzil(raw);
         downloadTanzil(i + 1, acc);

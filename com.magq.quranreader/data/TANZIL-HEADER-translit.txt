@@ -1,0 +1,11 @@
+# --------------------------------------------------------------------
+#
+#  Quran Translation
+#  Name: Transliteration
+#  Translator: English Transliteration
+#  Language: English
+#  ID: en.transliteration
+#  Last Update: September 6, 2010
+#  Source: Tanzil.net
+#
+# --------------------------------------------------------------------

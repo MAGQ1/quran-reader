@@ -91,6 +91,24 @@
     line-height: 1.45;
     padding-top: 18px;
 }
+/* Transliteration line (Menu > Transliteration), between the Arabic and the English.
+   Tanzil's marks: underline = long vowel or heavy letter, bold = silent or dropped
+   when stopping, italic (with underlined th) = the letter dha. */
+.q-tr {
+    font-size: 17px;
+    line-height: 1.5;
+    padding-top: 14px;
+    color: #5f5644;
+}
+.q-tr-u {
+    text-decoration: underline;
+}
+.q-tr-b {
+    font-weight: bold;
+}
+.q-tr-i {
+    font-style: italic;
+}
 .q-en-num {
     color: #7a6a3a;
     font-weight: bold;
@@ -249,4 +267,7 @@ body.q-dark .q-marked .q-ribbon {
 }
 body.q-dark .q-playing .q-ribbon:after {
     border-bottom-color: #3a3322;
+}
+body.q-dark .q-tr {
+    color: #b9b3a0;
 }

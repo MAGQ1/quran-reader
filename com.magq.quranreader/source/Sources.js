@@ -46,6 +46,14 @@ var QuranSources = {
         { id: "regular", label: "Regular numbers (1, 2, 3)" }
     ],
 
+    // A transliteration line under the Arabic (Tanzil's English transliteration).
+    // The first one is the default: off, so the reader looks as before until it is
+    // switched on. "folder" is where its per-surah files are.
+    transliterations: [
+        { id: "off", label: "Off" },
+        { id: "en", label: "Show transliteration", folder: "data/translit" }
+    ],
+
     // The first one is the default.
     themes: [
         { id: "light", label: "Light" },
