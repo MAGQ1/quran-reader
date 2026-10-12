@@ -15,15 +15,18 @@ WHAT IT DOES
      right to left with CSS `unicode-bidi: bidi-override; direction: rtl`,
      because the device cannot order Arabic text itself.
 
-The original Unicode text in data/uthmani/ is NOT changed and stays the source
+The original Unicode text in data/<script>/ is NOT changed and stays the source
 for search. The shaped copy has the SAME number of words in the SAME order, so
 word N of the shaped text is word N of the plain text (handy for highlighting
 search hits).
 
-OUTPUT (inside com.magq.quranreader/)
-  fonts/QuranShaped.ttf          the custom font (install it on the device)
-  data/uthmani-shaped/NNN.json   shaped verses, one file per surah
-  data/shaped-extra.json         shaped surah names + bismillah
+Every script in SCRIPTS is shaped into the SAME font (identical letter clusters
+share one glyph), so the device needs only one installed font.
+
+OUTPUT (inside com.magq.quranreader/), per script in SCRIPTS
+  fonts/QuranShaped.ttf          the custom font, all scripts (install it on the device)
+  data/<shaped>/NNN.json         shaped verses, one file per surah
+  data/<extra>                   shaped surah names + that script's bismillah
 
 USAGE
   python tools/shape-arabic.py
@@ -54,6 +57,14 @@ PUA_END = 0xF8FF  # end of the Basic Multilingual Plane private-use area
 # Characters the app itself draws around the verses: verse-number brackets and
 # digits in both styles (Arabic-Indic and regular 0-9). They need no joining,
 # so they stay ordinary characters.
+# The Arabic scripts: (plain folder under data/, shaped folder, extra file). The plain
+# text and its Bismillah (data/bismillah.json, keyed by folder) come from
+# tools/build-data.js. Add a new one here and in source/Sources.js.
+SCRIPTS = [
+    ("uthmani", "uthmani-shaped", "shaped-extra.json"),
+    ("simple", "simple-shaped", "shaped-extra-simple.json"),
+]
+
 KEEP_CHARS = [0x20, 0xFD3E, 0xFD3F] + list(range(0x0660, 0x066A)) + list(range(0x30, 0x3A))
 
 # Extra space (font units, 1000 = one em) put after a letter that does NOT connect
@@ -295,39 +306,42 @@ def main():
     data = os.path.join(APP, "data")
     shaper = Shaper(SOURCE_FONT)
 
-    out_dir = os.path.join(data, "uthmani-shaped")
-    os.makedirs(out_dir, exist_ok=True)
-
-    verses = 0
-    for path in sorted(glob.glob(os.path.join(data, "uthmani", "*.json"))):
-        with open(path, encoding="utf-8") as f:
-            plain = json.load(f)
-        shaped = [shaper.text(v) for v in plain]
-        # Same words in the same order, or search-highlighting would break.
-        for a, b in zip(plain, shaped):
-            assert len(a.split(" ")) == len(b.split(" ")), "word count changed"
-        write_json(os.path.join(out_dir, os.path.basename(path)), shaped)
-        verses += len(shaped)
-
     with open(os.path.join(data, "surahs.json"), encoding="utf-8") as f:
         surahs = json.load(f)
     with open(os.path.join(data, "bismillah.json"), encoding="utf-8") as f:
         bismillah = json.load(f)
-    write_json(os.path.join(data, "shaped-extra.json"), {
-        "bismillah": shaper.text(bismillah["text"]),
-        "names": [shaper.text(s["ar"]) for s in surahs],
-    })
+
+    verses = 0
+    for plain_folder, shaped_folder, extra_file in SCRIPTS:
+        out_dir = os.path.join(data, shaped_folder)
+        os.makedirs(out_dir, exist_ok=True)
+        paths = sorted(glob.glob(os.path.join(data, plain_folder, "*.json")))
+        assert len(paths) == 114, "%s: expected 114 surah files" % plain_folder
+        for path in paths:
+            with open(path, encoding="utf-8") as f:
+                plain = json.load(f)
+            shaped = [shaper.text(v) for v in plain]
+            # Same words in the same order, or search-highlighting would break.
+            for a, b in zip(plain, shaped):
+                assert len(a.split(" ")) == len(b.split(" ")), "word count changed"
+            write_json(os.path.join(out_dir, os.path.basename(path)), shaped)
+            verses += len(shaped)
+        # Surah names are the same list for every script (from surahs.json).
+        write_json(os.path.join(data, extra_file), {
+            "bismillah": shaper.text(bismillah[plain_folder]),
+            "names": [shaper.text(s["ar"]) for s in surahs],
+        })
 
     font_path = os.path.join(APP, "fonts", "QuranShaped.ttf")
     shaper.build_font(font_path)
 
-    print("verses shaped:            %d" % verses)
+    print("verses shaped:            %d (%d scripts)" % (verses, len(SCRIPTS)))
     print("custom glyphs created:    %d" % len(shaper.keys))
     print("missing-glyph hits:       %d (should be 0)" % shaper.notdef_hits)
     print("font size:                %d KB" % (os.path.getsize(font_path) // 1024))
 
     if args.preview:
-        preview(font_path, out_dir, args.preview)
+        preview(font_path, os.path.join(data, SCRIPTS[0][1]), args.preview)
 
 
 def preview(font_path, shaped_dir, folder):

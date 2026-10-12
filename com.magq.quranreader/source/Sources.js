@@ -21,6 +21,14 @@ var QuranSources = {
             shapedFolder: "data/uthmani-shaped",
             shapedExtra: "data/shaped-extra.json",
             fontFamily: "'Quran Shaped', serif"
+        },
+        {
+            // Modern standard (Imla'ei) spelling, e.g. الْعَالَمِينَ for ٱلْعَـٰلَمِينَ.
+            id: "simple", label: "Simple (Imla'ei)",
+            folder: "data/simple",
+            shapedFolder: "data/simple-shaped",
+            shapedExtra: "data/shaped-extra-simple.json",
+            fontFamily: "'Quran Shaped', serif"
         }
     ],
 

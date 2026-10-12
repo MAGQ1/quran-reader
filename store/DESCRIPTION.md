@@ -19,8 +19,8 @@ fully offline; recitation audio is fetched verse by verse as you listen and need
 an internet connection.
 
 **Reading**
-- The Arabic text in the Uthmani script, with all the vowel marks and stop signs,
-  properly joined and laid out for the TouchPad.
+- The Arabic text in the Uthmani script or in the Simple (Imla'ei) modern spelling,
+  with all the vowel marks and stop signs, properly joined and laid out for the TouchPad.
 - The English translation shown under each verse. Choose between Talal Itani's
   modern English (the default) and the classic translation by Marmaduke Pickthall.
 - Choose Arabic-style or regular verse numbers.

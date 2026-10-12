@@ -27,7 +27,7 @@ Note: the bundle is ~555 KB, too big to read in one go. It gets saved to a file;
 
 A basic Quran reading app. The user can search surahs and browse by juz, read Arabic with an English translation side by side, and their reading position is saved. Verse-by-verse recitation with highlighting is built (see below); word-level highlighting is deferred.
 
-The user picks the **Arabic script** and **English translation** from the app's top drop-down menu. Currently offered: Uthmani script; English translations Talal Itani (default, CC BY-ND 4.0, from ClearQuran itself) and Marmaduke Pickthall (public domain). Saheeh International was dropped on 2026-09-20 to avoid its non-commercial/notify-the-publisher conditions. Choices are saved (an unknown saved choice falls back to the first entry).
+The user picks the **Arabic script** and **English translation** from the app's top drop-down menu. Currently offered: Uthmani script and Simple (Imla'ei) script (added 2026-10-12, both Tanzil 1.1); English translations Talal Itani (default, CC BY-ND 4.0, from ClearQuran itself) and Marmaduke Pickthall (public domain). Saheeh International was dropped on 2026-09-20 to avoid its non-commercial/notify-the-publisher conditions. Choices are saved (an unknown saved choice falls back to the first entry).
 
 Code rules: ES5 only in the app (`var`, no arrow functions/`let`/`const`/template strings) — the TouchPad's browser is from 2011. Every new JS file must be added to `depends.js` or it silently won't load.
 
@@ -50,7 +50,7 @@ Key files (app folder is `com.magq.quranreader/`):
 - `../com.magq.quranreader.service/` — the recitation fetch service (`QuranAudioService.js`, `services.json`, `sources.json`); `../com.magq.quranreader.package/packageinfo.json` — the package that ties app + service together
 
 Outside the app folder (not packaged onto the device):
-- `tools/build-data.js` — downloads the texts and regenerates `data/` (`node tools/build-data.js`), with sanity checks (114 surahs, 6236 verses, 30 juz). The Arabic comes from **tanzil.net itself** (`TANZIL_URL`), the names/juz/Pickthall from Al Quran Cloud; it also writes Tanzil's copyright block to `data/TANZIL-HEADER.txt`
+- `tools/build-data.js` — downloads the texts and regenerates `data/` (`node tools/build-data.js`), with sanity checks (114 surahs, 6236 verses, 30 juz). The Arabic comes from **tanzil.net itself** (`TANZIL_URL`), the names/juz/Pickthall from Al Quran Cloud; it also writes each script's Tanzil copyright block to `data/TANZIL-HEADER-<folder>.txt`. **To add another Tanzil script:** one entry in `TANZIL_SCRIPTS` (`build-data.js`), one in `SCRIPTS` (`shape-arabic.py`), one in `Sources.js`; all scripts share the one `QuranShaped.ttf` (identical clusters share a glyph; the BMP private-use area holds ~6,400, Uthmani + Simple use 3,138). `data/bismillah.json` is keyed by script folder. Budget measured 2026-10-11: Uthmani Minimal would add ~511 glyphs, Simple Minimal ~562
 - `tools/make-icons.js` — generates the two icons
 - `tools/fetch-itani.js` — reads Talal Itani's translation from clearquran.com into `data/itani` (run after `build-data.js`; never let `build-data.js` write that folder)
 - `tools/shape-arabic.py` — pre-joins the Arabic for the device and builds `QuranShaped.ttf` (Python; `pip install -r tools/requirements.txt`, ideally in a venv)
@@ -127,7 +127,7 @@ Working and confirmed on the device (2026-09-20): joined Arabic with correctly p
 
 Dark theme (built + confirmed on the device 2026-09-26): a "Theme" menu (Light/Dark, saved like the other menus). Applied by toggling a `q-dark` class on `document.body` — **not** on the app's own root control — because Enyo's popups (the top menu, About/restart dialogs) render into a separate DOM layer that is only a descendant of `<body>`, not of the app's own tree. Popup chrome (the Onyx dialog border image) is a fixed light-coloured graphic either way and is not re-themed; only Home/Reader content is. See the `body.q-dark` rules at the end of `style.css`.
 
-Planned next: **search inside the ayahs** (the plain Unicode text in `data/uthmani/` is kept untouched exactly for this — search it there, ignoring vowel marks and tatweel (U+0640), and use the shaped text only to display; shaped and plain verses have the same words in the same order, so a hit on word N can highlight word N).
+Planned next: **search inside the ayahs** (the plain Unicode text in `data/uthmani/` and `data/simple/` is kept untouched exactly for this — search it there, ignoring vowel marks and tatweel (U+0640), and use the shaped text only to display; shaped and plain verses have the same words in the same order, so a hit on word N can highlight word N).
 
 ## Indo-Pak script — investigated 2026-09-26, DEFERRED (do not build yet)
 
@@ -169,7 +169,7 @@ After editing a file and reinstalling, the app can keep running **stale JavaScri
 ## Licensing (researched 2026-09-20; not legal advice)
 
 The app is **free and non-commercial** (decided; keep it that way — the Tanzil terms and some sources assume it).
-- **Arabic text — Tanzil Uthmani 1.1, CC BY 3.0** (downloaded from tanzil.net directly since 2026-10-11; Tanzil's full copyright block is kept verbatim in `data/TANZIL-HEADER.txt`): verbatim copies only, "CHANGING IT IS NOT ALLOWED"; must clearly credit Tanzil Project, link to tanzil.net, and reproduce the copyright notice in derived files (`data/NOTICE.txt`; About has an Open tanzil.net button). The original Unicode text stays unchanged in `data/uthmani/`; the joined-letter copy is a rendering of it. Al Quran Cloud also asks that Uthmani spelling and diacritics be preserved.
+- **Arabic text — Tanzil Uthmani 1.1, CC BY 3.0** (downloaded from tanzil.net directly since 2026-10-11; Tanzil's full copyright block is kept verbatim in `data/TANZIL-HEADER-<folder>.txt`, one per script): verbatim copies only, "CHANGING IT IS NOT ALLOWED"; must clearly credit Tanzil Project, link to tanzil.net, and reproduce the copyright notice in derived files (`data/NOTICE.txt`; About has an Open tanzil.net button). The original Unicode text stays unchanged in `data/uthmani/`; the joined-letter copy is a rendering of it. Al Quran Cloud also asks that Uthmani spelling and diacritics be preserved.
 - **Talal Itani — CC BY-ND 4.0** (https://blog.clearquran.com/download): free incl. commercial, files must stay unmodified, credit exactly "Translation by Talal Itani, ClearQuran.com", link and licence note appreciated (About has an Open clearquran.com button). **`data/itani` comes from clearquran.com itself (`node tools/fetch-itani.js`), NOT from Al Quran Cloud** — that copy is an older revision (43 verses differ, with typos). `tools/build-data.js` deliberately does not touch `data/itani`. Itani writes "God" where Pickthall writes "Allah".
 - **Pickthall (1930) — public domain** (published before 1 Jan 1931; died 1936). From Al Quran Cloud `en.pickthall`.
 - **Amiri Quran — SIL OFL 1.1:** modified font must stay under OFL with the copyright notice, no reserved font name, cannot be sold alone; ours is renamed "Quran Shaped" (`fonts/OFL.txt`).

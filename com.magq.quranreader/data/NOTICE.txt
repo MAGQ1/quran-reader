@@ -3,9 +3,10 @@ NOTICES FOR THE DATA IN THIS FOLDER
 Quran Reader by MAGQ is a free, non-commercial app.
 
 
-ARABIC TEXT -- uthmani/, uthmani-shaped/, shaped-extra.json, bismillah.json
+ARABIC TEXT -- uthmani/, simple/, uthmani-shaped/, simple-shaped/,
+               shaped-extra.json, shaped-extra-simple.json, bismillah.json
 ------------------------------------------------------------------------------
-Tanzil Quran Text (Uthmani, Version 1.1)
+Tanzil Quran Text (Uthmani, Version 1.1) and (Simple, Version 1.1)
 Copyright (C) 2007-2026 Tanzil Project - https://tanzil.net
 License: Creative Commons Attribution 3.0
 
@@ -20,17 +21,20 @@ Terms of use, summarised from https://tanzil.net/docs/text_license :
     containing a substantial portion of it.
 
 How this app uses the text:
-  - uthmani/ holds the text unchanged. It was downloaded from tanzil.net
-    (Uthmani, "Text (with aya numbers)", with Tanzil's options for pause
-    marks, sajdah and rub el hizb signs, and tatweel below superscript
-    alefs). Tanzil's full copyright block, exactly as it came with the
-    download, is in TANZIL-HEADER.txt. The only difference from
-    that source is that the Bismillah, which the source attaches to the first
-    verse of most surahs, is shown as a separate heading (see bismillah.json).
-  - uthmani-shaped/ and shaped-extra.json are the SAME text with its letters
-    joined and laid out ahead of time so that older devices can draw it
-    (tools/shape-arabic.py). They are a rendering of the text above, not a
-    different text: every word is present, in the same order. They are stored
+  - uthmani/ (Uthmani script) and simple/ (Simple, Imla'ei spelling) hold the
+    texts unchanged. They were downloaded from tanzil.net ("Text (with aya
+    numbers)", with Tanzil's options for pause marks, sajdah and rub el hizb
+    signs, superscript alefs, and tatweel below superscript alefs). Tanzil's
+    full copyright block, exactly as it came with each download, is in
+    TANZIL-HEADER-uthmani.txt and TANZIL-HEADER-simple.txt. The only
+    difference from that source is that the Bismillah, which the source
+    attaches to the first verse of most surahs, is shown as a separate
+    heading (see bismillah.json).
+  - uthmani-shaped/, simple-shaped/ and the shaped-extra files are the SAME
+    texts with their letters joined and laid out ahead of time so that older
+    devices can draw them (tools/shape-arabic.py). They are a rendering of
+    the texts above, not a different text: every word is present, in the
+    same order. They are stored
     as private-use characters that only the app's "Quran Shaped" font can draw.
 
 

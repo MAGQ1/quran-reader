@@ -5,9 +5,10 @@
 //   node tools/build-data.js
 //
 // Sources:
-//  - The Arabic (Uthmani) text is downloaded from tanzil.net ITSELF (TANZIL_URL), as
-//    Tanzil publishes it: version 1.1, with pause marks, sajdah and rub el hizb
-//    signs, and Tanzil's own "tatweel below superscript alefs" option (الرَّحْمَـٰن).
+//  - The Arabic texts (TANZIL_SCRIPTS: Uthmani, and Simple/Imla'ei) are downloaded
+//    from tanzil.net ITSELF, as Tanzil publishes them: version 1.1, with pause marks,
+//    sajdah and rub el hizb signs, and Tanzil's own "tatweel below superscript alefs"
+//    option (الرَّحْمَـٰن).
 //    The tatweel gives each small alif room of its own: without it, Amiri Quran
 //    stacks the small alif, the fatha and the next letter's marks on top of each
 //    other (seen on the device in 36:9, 36:23, 36:58 ...). It is used verbatim.
@@ -28,7 +29,7 @@ var OUT = path.join(__dirname, '..', 'com.magq.quranreader', 'data');
 
 // Each entry becomes data/<folder>/001.json ... 114.json
 var EDITIONS = [
-    { id: 'quran-uthmani', folder: 'uthmani' },   // only for names and juz; the text itself comes from TANZIL_URL
+    { id: 'quran-uthmani', folder: 'uthmani' },   // only for names and juz; the Arabic text itself comes from TANZIL_SCRIPTS
     { id: 'en.pickthall',  folder: 'pickthall' }
 ];
 
@@ -36,8 +37,19 @@ var EDITIONS = [
 // EDITIONS above, and in source/Sources.js.
 var TRANSLATIONS = ['pickthall'];
 
-var TANZIL_URL = 'https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2' +
-    '&marks=true&sajdah=true&rub=true&tatweel=true&agree=true';
+// The Arabic scripts, all from Tanzil. Each becomes data/<folder>/001.json ... 114.json,
+// its Bismillah goes into data/bismillah.json under <folder>, and Tanzil's copyright
+// block into data/TANZIL-HEADER-<folder>.txt. Add a new one here, in
+// tools/shape-arabic.py (SCRIPTS) and in source/Sources.js.
+var TANZIL_SCRIPTS = [
+    { type: 'uthmani', folder: 'uthmani', title: 'Tanzil Quran Text (Uthmani' },
+    { type: 'simple',  folder: 'simple',  title: 'Tanzil Quran Text (Simple' }
+];
+
+function tanzilUrl(type) {
+    return 'https://tanzil.net/pub/download/index.php?quranType=' + type + '&outType=txt-2' +
+        '&marks=true&sajdah=true&rub=true&alef=true&tatweel=true&agree=true';
+}
 
 function getRaw(url, cb) {
     https.get(url, function (res) {
@@ -49,7 +61,7 @@ function getRaw(url, cb) {
 }
 
 // Tanzil's "Text (with aya numbers)" file: one "surah|ayah|text" line per verse,
-// then its copyright block as "#" lines (kept for data/TANZIL-HEADER.txt).
+// then its copyright block as "#" lines (kept for data/TANZIL-HEADER-<folder>.txt).
 function parseTanzil(raw) {
     var verses = {}, header = [], count = 0;
     raw.replace(/^﻿/, '').split(/\r?\n/).forEach(function (line) {
@@ -103,14 +115,20 @@ function build(editions, i, results) {
 }
 
 function finish(results) {
-    var uth = results.uthmani;
-    var tanzil = results.tanzil;
+    var uth = results.uthmani;   // Al Quran Cloud: names, revelation types, juz
+    var tanzil = results.tanzil; // folder -> parsed Tanzil text
 
-    // The Bismillah text, taken from the first verse of Al-Fatiha.
-    var bismillah = tanzil.verses['1:1'].trim();
+    // Each script's Bismillah, taken from its own first verse of Al-Fatiha.
+    var bismillahs = {};
+    TANZIL_SCRIPTS.forEach(function (sc) {
+        var t = tanzil[sc.folder];
+        check(t.count === 6236, sc.type + ': expected 6236 Tanzil verses, got ' + t.count);
+        check(t.header.join('\n').indexOf(sc.title) !== -1, sc.type + ': Tanzil copyright block not found');
+        bismillahs[sc.folder] = t.verses['1:1'].trim();
+    });
 
     var index = [];
-    var stripped = 0;
+    var stripped = {};
     var totalAyahs = 0;
     var juzStarts = {};
 
@@ -122,26 +140,32 @@ function finish(results) {
             check(s.ayahs.length === e.ayahs.length, folder + ': ayah count mismatch in surah ' + s.number);
         });
 
-        var arabic = s.ayahs.map(function (a, ai) {
+        s.ayahs.forEach(function (a, ai) {
             check(a.numberInSurah === ai + 1, 'ayah numbering in surah ' + s.number);
-            var t = tanzil.verses[s.number + ':' + (ai + 1)];
-            check(t !== undefined, 'Tanzil text has no verse ' + s.number + ':' + (ai + 1));
-            // Surahs 2-114 (except 9) have the Bismillah glued onto verse 1.
-            if (ai === 0 && s.number !== 1 && s.number !== 9) {
-                // Compare the first four words with diacritics removed: the
-                // source spells a few marks differently in some surahs (e.g. 95, 97).
-                var words = t.split(' ');
-                check(bare(words.slice(0, BISMILLAH_WORDS).join(' ')) === bare(bismillah),
-                    'expected Bismillah prefix in surah ' + s.number);
-                t = words.slice(BISMILLAH_WORDS).join(' ');
-                stripped++;
-            }
-            check(t.length > 0, 'empty Arabic text at ' + s.number + ':' + (ai + 1));
             if (!juzStarts[a.juz]) { juzStarts[a.juz] = { juz: a.juz, surah: s.number, ayah: a.numberInSurah }; }
-            return t;
         });
-        totalAyahs += arabic.length;
-        writeJson(path.join(OUT, 'uthmani', pad3(s.number) + '.json'), arabic);
+        totalAyahs += s.ayahs.length;
+
+        TANZIL_SCRIPTS.forEach(function (sc) {
+            var arabic = s.ayahs.map(function (a, ai) {
+                var t = tanzil[sc.folder].verses[s.number + ':' + (ai + 1)];
+                check(t !== undefined, sc.type + ': Tanzil text has no verse ' + s.number + ':' + (ai + 1));
+                // Surahs 2-114 (except 9) have the Bismillah glued onto verse 1.
+                if (ai === 0 && s.number !== 1 && s.number !== 9) {
+                    // Compare the first four words with diacritics removed: the
+                    // source spells a few marks differently in some surahs (e.g. 95, 97).
+                    var words = t.split(' ');
+                    check(bare(words.slice(0, BISMILLAH_WORDS).join(' ')) === bare(bismillahs[sc.folder]),
+                        sc.type + ': expected Bismillah prefix in surah ' + s.number);
+                    t = words.slice(BISMILLAH_WORDS).join(' ');
+                    stripped[sc.folder] = (stripped[sc.folder] || 0) + 1;
+                }
+                check(t.length > 0, sc.type + ': empty Arabic text at ' + s.number + ':' + (ai + 1));
+                return t;
+            });
+            writeJson(path.join(OUT, sc.folder, pad3(s.number) + '.json'), arabic);
+        });
+
         TRANSLATIONS.forEach(function (folder) {
             var english = results[folder][si].ayahs.map(function (a, ai) {
                 check(a.text.length > 0, folder + ': empty English text at ' + s.number + ':' + (ai + 1));
@@ -165,22 +189,34 @@ function finish(results) {
         .sort(function (a, b) { return a.juz - b.juz; });
 
     check(totalAyahs === 6236, 'expected 6236 ayahs, got ' + totalAyahs);
-    check(tanzil.count === 6236, 'expected 6236 Tanzil verses, got ' + tanzil.count);
-    check(tanzil.header.join('\n').indexOf('Tanzil Quran Text (Uthmani') !== -1, 'Tanzil copyright block not found');
     check(juz.length === 30, 'expected 30 juz, got ' + juz.length);
-    check(stripped === 112, 'expected to strip 112 Bismillahs, stripped ' + stripped);
+    TANZIL_SCRIPTS.forEach(function (sc) {
+        check(stripped[sc.folder] === 112, sc.type + ': expected to strip 112 Bismillahs, stripped ' + stripped[sc.folder]);
+    });
 
     writeJson(path.join(OUT, 'surahs.json'), index);
     writeJson(path.join(OUT, 'juz.json'), juz);
-    writeJson(path.join(OUT, 'bismillah.json'), { text: bismillah });
+    writeJson(path.join(OUT, 'bismillah.json'), bismillahs);
     // Tanzil asks for its copyright block to go with every copy of the text.
-    fs.writeFileSync(path.join(OUT, 'TANZIL-HEADER.txt'), tanzil.header.join('\n') + '\n', 'utf8');
+    TANZIL_SCRIPTS.forEach(function (sc) {
+        fs.writeFileSync(path.join(OUT, 'TANZIL-HEADER-' + sc.folder + '.txt'),
+            tanzil[sc.folder].header.join('\n') + '\n', 'utf8');
+    });
 
-    console.log('OK: 114 surahs, ' + totalAyahs + ' ayahs, 30 juz, ' + stripped + ' Bismillahs moved to headers.');
+    console.log('OK: 114 surahs, ' + totalAyahs + ' ayahs, 30 juz, Bismillahs moved to headers, scripts: ' +
+        TANZIL_SCRIPTS.map(function (sc) { return sc.folder; }).join(', ') + '.');
 }
 
-console.log('Downloading the Uthmani text from tanzil.net ...');
-getRaw(TANZIL_URL, function (err, raw) {
-    check(!err, err && err.message);
-    build(EDITIONS, 0, { tanzil: parseTanzil(raw) });
-});
+// Downloads every Tanzil script in turn, then the Al Quran Cloud editions.
+function downloadTanzil(i, acc) {
+    if (i === TANZIL_SCRIPTS.length) { return build(EDITIONS, 0, { tanzil: acc }); }
+    var sc = TANZIL_SCRIPTS[i];
+    console.log('Downloading the ' + sc.type + ' text from tanzil.net ...');
+    getRaw(tanzilUrl(sc.type), function (err, raw) {
+        check(!err, err && err.message);
+        acc[sc.folder] = parseTanzil(raw);
+        downloadTanzil(i + 1, acc);
+    });
+}
+
+downloadTanzil(0, {});

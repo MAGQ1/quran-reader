@@ -67,7 +67,7 @@ enyo.kind({
             {allowHtml: true, style: "padding: 8px 0;", onclick: "aboutClick", content:
                 "All praise is due to Allah, the Most High.<br><br>" +
                 "Arabic text: <a href=\"#\" class=\"q-link\" data-url=\"http://tanzil.net\">Tanzil Project (tanzil.net)</a>, " +
-                "Uthmani script, version 1.1. Copyright (C) 2007-2026 Tanzil Project, " +
+                "Uthmani and Simple (Imla'ei) scripts, version 1.1. Copyright (C) 2007-2026 Tanzil Project, " +
                 "<a href=\"#\" class=\"q-link\" data-url=\"http://creativecommons.org/licenses/by/3.0/\">Creative Commons Attribution 3.0</a>. " +
                 "The text is unchanged.<br><br>" +
                 "English translations: <a href=\"#\" class=\"q-link\" data-url=\"https://www.clearquran.com\">Translation by Talal Itani, ClearQuran.com</a> " +
