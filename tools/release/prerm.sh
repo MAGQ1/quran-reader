@@ -25,6 +25,8 @@ echo "$APP_ID: removing the Arabic font..."
 
 # Only ever remove the one file this app installed. The path is absolute and fixed.
 if [ -f "$DST" ]; then
+    # The root filesystem can be read-only (seen 2026-10-17); postinst does the same.
+    mount -o remount,rw / 2>/dev/null
     rm -f "$DST"
     fc-cache -f /usr/share/fonts 2>/dev/null
 fi

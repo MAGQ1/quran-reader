@@ -1,7 +1,7 @@
 # Quran Reader - App Museum II listing text (draft)
 
 **Name:** Quran Reader
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Author / vendor:** MAGQ
 **Devices:** HP TouchPad (webOS 3.0.5)
 **Price:** Free, no ads
@@ -27,6 +27,8 @@ an internet connection.
 - Choose Arabic-style or regular verse numbers.
 - Light or dark theme.
 - Your reading place is saved, and "Continue reading" takes you straight back.
+- Bookmark any verse with the ribbon beside it; your bookmarks are listed on the
+  home screen's Bookmarks tab.
 
 **Listening**
 - Play a verse's recitation with a tap - either the toolbar Play button (continuing
@@ -79,6 +81,18 @@ an internet connection.
 All praise is due to Allah, the Most High.
 
 ## Changelog
+
+### 1.2.0
+
+- Bookmarks: tap the ribbon beside any verse; find them on the home screen's
+  Bookmarks tab
+- New Arabic script option: Simple (Imla'ei), alongside Uthmani
+- Optional transliteration line under the Arabic (Tanzil's English transliteration)
+- The Arabic text is now Tanzil's latest version (1.1), which includes Tanzil's
+  corrections and fixes small vowel marks that overlapped in some words
+- The About screen now scrolls and fits the screen in both orientations
+- The update message now shows the new and current version numbers
+- Please restart your TouchPad once after updating (the Arabic font has changed)
 
 ### 1.1.0
 
