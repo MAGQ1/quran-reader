@@ -2,6 +2,24 @@
 .enyo-modaldialog.q-about {
     width: 680px;
 }
+/* 200px is only a starting size; App.fitAbout sets the real height when About opens. */
+.q-about-scroller {
+    height: 200px;
+}
+.q-scroll-track {
+    position: relative;
+    width: 8px;
+    margin-left: 12px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.12);
+}
+.q-scroll-thumb {
+    position: absolute;
+    left: 0;
+    width: 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.45);
+}
 .q-link {
     color: #1d6ec7;
     text-decoration: underline;

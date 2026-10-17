@@ -65,7 +65,12 @@ enyo.kind({
         {name: "about", kind: "ModalDialog", lazy: false, className: "q-about", caption: "About Quran Reader", components: [
             // Links are plain <a> tags carrying their address in data-url; aboutClick opens
             // them in the browser (a normal link would navigate the app away).
-            {allowHtml: true, style: "padding: 8px 0;", onclick: "aboutClick", content:
+            // The text scrolls inside a box sized to the screen (fitAbout) so the version
+            // and Close button always stay on screen. Enyo's scroller has no scroll bar,
+            // so aboutTrack/aboutThumb draw one (updateAboutBar).
+            {kind: "HFlexBox", components: [
+            {name: "aboutScroller", kind: "Scroller", flex: 1, className: "q-about-scroller", onScroll: "updateAboutBar", components: [
+            {name: "aboutText", allowHtml: true, style: "padding: 8px 0;", onclick: "aboutClick", content:
                 "All praise is due to Allah, the Most High.<br><br>" +
                 "Arabic text: <a href=\"#\" class=\"q-link\" data-url=\"http://tanzil.net\">Tanzil Project (tanzil.net)</a>, " +
                 "Uthmani and Simple (Imla'ei) scripts, version 1.1. Copyright (C) 2007-2026 Tanzil Project, " +
@@ -89,7 +94,12 @@ enyo.kind({
                 "(no serial number).<br><br>" +
                 "Any errors in the displaying of the Quran were done purely by accident. " +
                 "Contact MAGQ on the webOS Archive server if there are any. " +
-                "May Allah forgive those mistakes."},
+                "May Allah forgive those mistakes."}
+            ]},
+            {name: "aboutTrack", className: "q-scroll-track", components: [
+                {name: "aboutThumb", className: "q-scroll-thumb"}
+            ]}
+            ]},
             {name: "aboutVersion", style: "padding: 4px 0 8px 0; color: #666;"},
             {kind: "Button", caption: "Close", onclick: "closeAbout"}
         ]}
@@ -122,6 +132,7 @@ enyo.kind({
         this.inherited(arguments);
         var self = this;
         this.openFromParams(enyo.windowParams);   // started from Just Type
+        this.watchRotation();
         setTimeout(function () {
             if (!QuranFont.isLoaded()) { self.$.fontDialog.openAtCenter(); }
         }, 800);
@@ -271,6 +282,59 @@ enyo.kind({
     showAbout: function () {
         this.$.aboutVersion.setContent("Version " + this.appVersion());
         this.$.about.openAtCenter();
+        this.fitAbout();
+    },
+
+    // Makes the About text box as tall as the screen allows (landscape or portrait),
+    // starts it at the top, and re-centres the dialog. Needs the dialog open to measure.
+    // inKeepPlace (after a rotation) keeps the reader's place instead of going to the top.
+    fitAbout: function (inKeepPlace) {
+        var scroller = this.$.aboutScroller.hasNode();
+        var text = this.$.aboutText.hasNode();
+        var dialog = this.$.about.hasNode();
+        if (!scroller || !text || !dialog) { return; }
+        var place = this.$.aboutScroller.scrollTop;
+        // Measure from a small known size: once the dialog is taller than the screen,
+        // Enyo squeezes it to fit and its measured height is no longer the real one.
+        this.$.aboutScroller.applyStyle("height", "200px");
+        this.$.about.clearClampedSize();
+        var chrome = dialog.offsetHeight - scroller.offsetHeight;   // title, version, Close, padding
+        var room = Math.max(150, window.innerHeight - chrome - 40);
+        var fits = text.offsetHeight <= room;
+        this.$.aboutScroller.applyStyle("height", Math.min(room, text.offsetHeight) + "px");
+        this.$.aboutTrack.applyStyle("visibility", fits ? "hidden" : "visible");
+        var b = this.$.aboutScroller.getBoundaries();
+        this.$.aboutScroller.setScrollTop(inKeepPlace ? Math.max(b.top, Math.min(b.bottom, place)) : 0);
+        this.$.about.applyBoundsInfo();
+        this.updateAboutBar();
+    },
+
+    // Sizes and moves the scroll bar thumb to match the About text's scroll position.
+    updateAboutBar: function () {
+        var s = this.$.aboutScroller;
+        var track = this.$.aboutTrack.hasNode();
+        if (!s.hasNode() || !track) { return; }
+        var b = s.getBoundaries();
+        var range = b.bottom - b.top;
+        var view = s.hasNode().clientHeight;
+        var trackH = track.clientHeight;
+        var thumbH = Math.max(40, Math.round(trackH * view / (view + range)));
+        var top = range > 0 ? (s.scrollTop - b.top) / range * (trackH - thumbH) : 0;
+        top = Math.max(0, Math.min(trackH - thumbH, top));   // stays inside during the bounce
+        this.$.aboutThumb.applyStyle("height", thumbH + "px");
+        this.$.aboutThumb.applyStyle("top", Math.round(top) + "px");
+    },
+
+    // Rotating the TouchPad while About is open re-sizes it for the new screen shape.
+    // Listens to the window itself; the short wait lets Enyo's own re-centring of the
+    // dialog (also on resize) happen first, so this one has the last word.
+    watchRotation: function () {
+        var self = this;
+        window.addEventListener("resize", function () {
+            setTimeout(function () {
+                if (self.$.about.isOpen) { self.fitAbout(true); }
+            }, 100);
+        }, false);
     },
 
     // ---- updates ----
