@@ -25,9 +25,14 @@
     text-decoration: underline;
 }
 
-/* Arabic uses the "Quran Shaped" font, which must be INSTALLED on the device
-   (tools/install-font.ps1). The TouchPad browser ignores web fonts, so there is
-   no @font-face here. The text is pre-joined by tools/shape-arabic.py. */
+/* Arabic uses the "Quran Shaped" font (the text is pre-joined by tools/shape-arabic.py).
+   On the TouchPad it must be INSTALLED on the device (the package's postinst, or
+   tools/install-font.ps1) and is used as "Quran Shaped".
+   Newer engines (Lunacy, LuneOS) load the same file from the app as the web font
+   "Quran Shaped Web", so the app works there even though no postinst runs.
+   NO @font-face here: the TouchPad's browser accepts an @font-face rule, then draws
+   hollow boxes and never falls back to the installed font (seen 2026-10-18).
+   FontCheck.js adds the rule only on engines that have document.fonts. */
 
 /* ---- Home: surah / juz list ---- */
 .q-controls {
@@ -64,7 +69,7 @@
    Do NOT add letter-spacing: the font already overlaps joined letters by design,
    and a negative value squeezed letters that are not joined. */
 .q-arabic {
-    font-family: "Quran Shaped", serif;
+    font-family: "Quran Shaped", "Quran Shaped Web", serif;
     font-size: 30px;
     direction: rtl;
     unicode-bidi: bidi-override;
@@ -78,7 +83,7 @@
     padding: 16px 28px 48px 28px;
 }
 .q-bismillah {
-    font-family: "Quran Shaped", serif;
+    font-family: "Quran Shaped", "Quran Shaped Web", serif;
     font-size: 34px;
     direction: rtl;
     unicode-bidi: bidi-override;
@@ -90,7 +95,7 @@
     border-bottom: 1px solid #e4dcc8;
 }
 .q-ar {
-    font-family: "Quran Shaped", serif;
+    font-family: "Quran Shaped", "Quran Shaped Web", serif;
     font-size: 36px;
     line-height: 2.1;
     direction: rtl;
@@ -139,6 +144,8 @@
 .q-title {
     text-align: center;
     font-weight: bold;
+    color: #e8e8e8;   /* the toolbar is dark in both themes */
+    padding: 0 8px;
 }
 /* "Go to verse..." and "Play from verse..." boxes in the toolbar; without a width
    they stretch like the other flex:1 toolbar controls (same issue as .q-mode
@@ -162,6 +169,75 @@
 }
 .q-audio-group .enyo-button {
     min-width: 40px;
+}
+/* Only used on narrow screens (below): where the reader toolbar starts its second row. */
+.q-toolbar-break {
+    display: none;
+}
+
+/* ---- Narrow screens (a phone in Lunacy, ~384px wide) ----
+   The reader toolbar is laid out for the TouchPad's 1024px and ran off both sides of a
+   phone. Below 700px it wraps: Back, title, Prev, Next on top; Go to and the Play group
+   underneath. Needs real flexbox (display: flex), which only newer engines have; the
+   TouchPad is never under 700px wide (768 portrait), so it never uses these rules.
+   Reader.fitToolbar() shortens the two hints to match. */
+@media (max-width: 699px) {
+    .q-reader-toolbar {
+        display: flex !important;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        padding: 4px 0;
+    }
+    .q-reader-toolbar > * {
+        order: 1;
+    }
+    .q-reader-toolbar .q-title {
+        flex: 1 1 0;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .q-reader-toolbar .q-toolbar-break {
+        display: block;
+        order: 2;
+        flex-basis: 100%;
+        height: 4px;
+    }
+    .q-reader-toolbar .q-goto,
+    .q-reader-toolbar .q-audio-group {
+        order: 3;
+    }
+    .q-goto {
+        width: 120px !important;
+    }
+    .q-play-verse {
+        width: 150px !important;
+    }
+
+    /* Text sized for the TouchPad's 10" screen is large on a phone: about 80%. */
+    .reader-body {
+        padding: 12px 14px 48px 14px;
+    }
+    .q-arabic {
+        font-size: 24px;
+    }
+    .q-bismillah {
+        font-size: 27px;
+    }
+    .q-ar {
+        font-size: 28px;
+    }
+    .q-ar-num {
+        font-size: 21px;
+    }
+    .q-en {
+        font-size: 16px;
+    }
+    .q-tr {
+        font-size: 15px;
+    }
 }
 /* The Pause icon: two solid bars drawn with CSS (no font on the device has a filled
    pause glyph -- the block characters came out hollow). Inline-block spans, so they sit

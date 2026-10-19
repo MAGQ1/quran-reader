@@ -11,7 +11,8 @@
 //   shapedFolder  the same words, pre-joined for display (tools/shape-arabic.py);
 //                 the TouchPad cannot join Arabic letters itself
 //   shapedExtra   shaped bismillah and surah names for the same script
-// The shaped text needs the "Quran Shaped" font installed on the device.
+// The shaped text needs the "Quran Shaped" font: installed on the TouchPad, or
+// loaded from the app as "Quran Shaped Web" on newer engines (see style.css).
 
 var QuranSources = {
     scripts: [
@@ -20,7 +21,7 @@ var QuranSources = {
             folder: "data/uthmani",
             shapedFolder: "data/uthmani-shaped",
             shapedExtra: "data/shaped-extra.json",
-            fontFamily: "'Quran Shaped', serif"
+            fontFamily: "'Quran Shaped', 'Quran Shaped Web', serif"
         },
         {
             // Modern standard (Imla'ei) spelling, e.g. الْعَالَمِينَ for ٱلْعَـٰلَمِينَ.
@@ -28,7 +29,7 @@ var QuranSources = {
             folder: "data/simple",
             shapedFolder: "data/simple-shaped",
             shapedExtra: "data/shaped-extra-simple.json",
-            fontFamily: "'Quran Shaped', serif"
+            fontFamily: "'Quran Shaped', 'Quran Shaped Web', serif"
         }
     ],
 

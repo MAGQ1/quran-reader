@@ -12,9 +12,14 @@ enyo.kind({
     },
 
     components: [
-        {kind: "Toolbar", components: [
+        // On a narrow screen (a phone in Lunacy) this wraps onto two rows: see
+        // "Narrow screens" in style.css and fitToolbar().
+        {kind: "Toolbar", className: "q-reader-toolbar", components: [
             {kind: "Button", caption: "Back", onclick: "backTap"},
-            {name: "title", flex: 1, className: "q-title"},
+            // kind given: a Toolbar's default kind is ToolButton, whose setContent text
+            // never showed (the title was blank on the TouchPad and in Lunacy).
+            {name: "title", kind: "Control", flex: 1, className: "q-title"},
+            {kind: "Control", className: "q-toolbar-break"},   // kind given: a Toolbar's default is ToolButton
             {name: "gotoInput", kind: "Input", className: "q-goto", hint: "Go to verse...", onchange: "gotoTap"},
             // Grouped and bordered together (q-audio-group in style.css) so it
             // reads as one "audio" control, not two unrelated toolbar items.
@@ -68,7 +73,21 @@ enyo.kind({
     rendered: function () {
         this.inherited(arguments);
         this.createAudioNode();
-        this.watchForStuckPlayback();    },
+        this.watchForStuckPlayback();
+        this.fitToolbar();
+        var self = this;
+        window.addEventListener("resize", function () { self.fitToolbar(); }, false);
+    },
+
+    // The full labels do not fit on a narrow screen (and the title needs the room); the
+    // same 700px as the "Narrow screens" rules in style.css. The TouchPad is never that narrow.
+    fitToolbar: function () {
+        var narrow = window.innerWidth < 700;
+        this.$.gotoInput.setHint(narrow ? "Go to..." : "Go to verse...");
+        this.$.playInput.setHint(narrow ? "Play from..." : "Play from verse...");
+        this.$.prevButton.setCaption(narrow ? "Prev" : "Prev Surah");
+        this.$.nextButton.setCaption(narrow ? "Next" : "Next Surah");
+    },
 
     // A plain HTML5 Audio object, not shown -- controlled directly (play/pause/src,
     // and the native "ended"/"error" events; Enyo's own event system does not cover

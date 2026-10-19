@@ -134,7 +134,9 @@ enyo.kind({
         this.openFromParams(enyo.windowParams);   // started from Just Type
         this.watchRotation();
         setTimeout(function () {
-            if (!QuranFont.isLoaded()) { self.$.fontDialog.openAtCenter(); }
+            QuranFont.whenReady(function () {
+                if (!QuranFont.isLoaded()) { self.$.fontDialog.openAtCenter(); }
+            });
         }, 800);
         // Keep the Just Type surah list up to date, after the app has settled.
         setTimeout(function () { self.$.justType.setup(); }, 3000);
