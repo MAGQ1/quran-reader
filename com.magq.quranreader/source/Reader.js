@@ -79,10 +79,12 @@ enyo.kind({
         window.addEventListener("resize", function () { self.fitToolbar(); }, false);
     },
 
-    // The full labels do not fit on a narrow screen (and the title needs the room); the
-    // same 700px as the "Narrow screens" rules in style.css. The TouchPad is never that narrow.
+    // The full labels only fit in landscape. Below 900px (the TouchPad held upright is
+    // 768px wide; a phone in Lunacy ~384px) they shorten, or the title was squeezed into
+    // a tall column of single words overlapping "Go to verse...". Same 900px as
+    // "Upright and narrow screens" in style.css.
     fitToolbar: function () {
-        var narrow = window.innerWidth < 700;
+        var narrow = window.innerWidth < 900;
         this.$.gotoInput.setHint(narrow ? "Go to..." : "Go to verse...");
         this.$.playInput.setHint(narrow ? "Play from..." : "Play from verse...");
         this.$.prevButton.setCaption(narrow ? "Prev" : "Prev Surah");
@@ -205,7 +207,7 @@ enyo.kind({
         var font = this.script.fontFamily ? ' style="font-family:' + this.escapeHtml(this.script.fontFamily) + '"' : "";
         var html = [];
 
-        this.$.title.setContent(meta.n + ". " + meta.en + " – " + meta.tr);
+        this.$.title.setContent(meta.n + ". " + meta.en);
         this.verseCount = arabic.length;
         if (meta.bismillah) {
             html.push('<div class="q-bismillah"' + font + '>' + this.escapeHtml(bismillah) + '</div>');

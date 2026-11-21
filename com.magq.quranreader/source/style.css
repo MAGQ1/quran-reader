@@ -146,6 +146,13 @@
     font-weight: bold;
     color: #e8e8e8;   /* the toolbar is dark in both themes */
     padding: 0 8px;
+    /* One line, cut with "..." if it still does not fit. width: 0 makes the old
+       -webkit-box share out only the space left over, instead of starting from the
+       full width of the text and pushing into the boxes beside it. */
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 /* "Go to verse..." and "Play from verse..." boxes in the toolbar; without a width
    they stretch like the other flex:1 toolbar controls (same issue as .q-mode
@@ -173,6 +180,17 @@
 /* Only used on narrow screens (below): where the reader toolbar starts its second row. */
 .q-toolbar-break {
     display: none;
+}
+
+/* ---- Upright and narrow screens (the TouchPad held upright is 768px wide) ----
+   Reader.fitToolbar() shortens the labels below 900px; the two boxes shrink to match. */
+@media (max-width: 899px) {
+    .q-goto {
+        width: 120px !important;
+    }
+    .q-play-verse {
+        width: 150px !important;
+    }
 }
 
 /* ---- Narrow screens (a phone in Lunacy, ~384px wide) ----
@@ -209,13 +227,6 @@
     .q-reader-toolbar .q-audio-group {
         order: 3;
     }
-    .q-goto {
-        width: 120px !important;
-    }
-    .q-play-verse {
-        width: 150px !important;
-    }
-
     /* Text sized for the TouchPad's 10" screen is large on a phone: about 80%. */
     .reader-body {
         padding: 12px 14px 48px 14px;

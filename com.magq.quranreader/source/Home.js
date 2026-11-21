@@ -1,6 +1,39 @@
 // Home screen: browse and search surahs or juz, see bookmarks, and resume where
 // you left off.
 
+// One list on the home screen. Each tab (Surahs, Juz, Bookmarks) has its own, so
+// each keeps its own scroll position when you switch away and back; a single shared
+// list kept one position for all three, and a surah list scrolled down to row 62
+// showed the 30 juz as a blank page. Declared as a kind so the three lists' row
+// controls (num, title, ...) have separate names.
+enyo.kind({
+    name: "QuranHomeList",
+    kind: enyo.VirtualList,
+    flex: 1,
+    events: {
+        onRowTap: ""      // (inEvent): inEvent.rowIndex is the row
+    },
+    components: [
+        {name: "row", kind: "Item", className: "q-row", layoutKind: "HFlexLayout", onclick: "rowClick", components: [
+            {name: "num", className: "q-num"},
+            {kind: "VFlexBox", flex: 1, components: [
+                {name: "title"},
+                {name: "sub", className: "q-sub"}
+            ]},
+            {name: "arabic", className: "q-arabic"},
+            // Only shown on the Bookmarks list; rowTap checks for its class. The row
+            // stretches its children to full height, so the button sits in a box
+            // that centres it vertically at its own size.
+            {name: "removeBox", kind: "VFlexBox", pack: "center", components: [
+                {kind: "Button", className: "enyo-button-negative q-remove", caption: "Remove"}
+            ]}
+        ]}
+    ],
+    rowClick: function (inSender, inEvent) {
+        this.doRowTap(inEvent);
+    }
+});
+
 enyo.kind({
     name: "QuranHome",
     kind: enyo.VFlexBox,
@@ -30,22 +63,10 @@ enyo.kind({
         {name: "resumeButton", kind: "Button", className: "enyo-button-blue", showing: false, onclick: "resumeTap"},
         {name: "noBookmarks", className: "q-status", showing: false, allowHtml: true, content:
             "No bookmarks yet.<br>Tap the ribbon beside a verse to bookmark it."},
-        {name: "list", kind: "VirtualList", flex: 1, onSetupRow: "setupRow", components: [
-            {name: "row", kind: "Item", className: "q-row", layoutKind: "HFlexLayout", onclick: "rowTap", components: [
-                {name: "num", className: "q-num"},
-                {kind: "VFlexBox", flex: 1, components: [
-                    {name: "title"},
-                    {name: "sub", className: "q-sub"}
-                ]},
-                {name: "arabic", className: "q-arabic"},
-                // Only shown on the Bookmarks list; rowTap checks for its class. The row
-                // stretches its children to full height, so the button sits in a box
-                // that centres it vertically at its own size.
-                {name: "removeBox", kind: "VFlexBox", pack: "center", components: [
-                    {kind: "Button", className: "enyo-button-negative q-remove", caption: "Remove"}
-                ]}
-            ]}
-        ]}
+        // Hidden lists are kept, not emptied, so each keeps its place (see QuranHomeList).
+        {name: "surahList", kind: "QuranHomeList", flex: 1, onSetupRow: "setupRow", onRowTap: "rowTap"},
+        {name: "juzList", kind: "QuranHomeList", flex: 1, showing: false, onSetupRow: "setupRow", onRowTap: "rowTap"},
+        {name: "bookmarkList", kind: "QuranHomeList", flex: 1, showing: false, onSetupRow: "setupRow", onRowTap: "rowTap"}
     ],
 
     create: function () {
@@ -54,7 +75,7 @@ enyo.kind({
         this.surahs = [];
         this.shapedNames = [];
         this.juz = [];
-        this.items = [];       // what the list currently shows
+        this.items = {surah: [], juz: [], bookmarks: []};   // what each list shows
         this.loadIndex();
     },
 
@@ -74,7 +95,9 @@ enyo.kind({
             self.surahs = results[0];
             self.juz = results[1];
             self.shapedNames = results[2].names;   // Arabic names, pre-joined for display
-            self.updateItems();
+            self.updateItems("surah");
+            self.updateItems("juz");
+            self.updateItems("bookmarks");
             self.updateResume();
         });
     },
@@ -87,16 +110,27 @@ enyo.kind({
         return String(s).toLowerCase().replace(/[^a-z0-9؀-ۿ]/g, "");
     },
 
-    updateItems: function () {
-        if (this.mode === "juz") {
-            this.items = this.juz;
-        } else if (this.mode === "bookmarks") {
+    listFor: function (mode) {
+        return mode === "juz" ? this.$.juzList : mode === "bookmarks" ? this.$.bookmarkList : this.$.surahList;
+    },
+
+    modeOf: function (list) {
+        return list === this.$.juzList ? "juz" : list === this.$.bookmarkList ? "bookmarks" : "surah";
+    },
+
+    // Refills one tab's list. fromTop: start it at its first row (a new search);
+    // otherwise it keeps its scroll position (bookmarks added or removed).
+    updateItems: function (mode, fromTop) {
+        var list = this.listFor(mode);
+        if (mode === "juz") {
+            this.items.juz = this.juz;
+        } else if (mode === "bookmarks") {
             var surahs = this.surahs;
-            this.items = QuranBookmarks.all().filter(function (b) { return !!surahs[b.surah - 1]; });
+            this.items.bookmarks = QuranBookmarks.all().filter(function (b) { return !!surahs[b.surah - 1]; });
         } else {
             var q = this.normalize(this.$.search.getValue() || "");
             var self = this;
-            this.items = this.surahs.filter(function (s) {
+            this.items.surah = this.surahs.filter(function (s) {
                 if (q === "") { return true; }
                 return String(s.n) === q ||
                     self.normalize(s.en).indexOf(q) !== -1 ||
@@ -104,37 +138,46 @@ enyo.kind({
                     self.normalize(s.ar).indexOf(q) !== -1;
             });
         }
-        this.$.noBookmarks.setShowing(this.mode === "bookmarks" && this.items.length === 0);
-        this.$.list.reset();
+        if (mode === this.mode) { this.updateNoBookmarks(); }
+        if (fromTop) {
+            list.punt();
+        } else {
+            list.reset();
+        }
+    },
+
+    updateNoBookmarks: function () {
+        this.$.noBookmarks.setShowing(this.mode === "bookmarks" && this.items.bookmarks.length === 0);
     },
 
     // Called when the home screen comes back into view: bookmarks may have changed
     // in the reader.
     refreshBookmarks: function () {
-        if (this.mode === "bookmarks") { this.updateItems(); }
+        this.updateItems("bookmarks");
     },
 
     setupRow: function (inSender, inIndex) {
-        if (inIndex < 0 || inIndex >= this.items.length) { return false; }
-        var it = this.items[inIndex];
-        this.$.removeBox.setShowing(this.mode === "bookmarks");
-        if (this.mode === "bookmarks") {
+        var mode = this.modeOf(inSender), items = this.items[mode];
+        if (inIndex < 0 || inIndex >= items.length) { return false; }
+        var it = items[inIndex], r = inSender.$;
+        r.removeBox.setShowing(mode === "bookmarks");
+        if (mode === "bookmarks") {
             var s = this.surahs[it.surah - 1];
-            this.$.num.setContent(it.surah);
-            this.$.title.setContent(s.en + " " + it.surah + ":" + it.ayah);
-            this.$.sub.setContent(s.tr + " · verse " + it.ayah + " of " + s.count);
-            this.$.arabic.setContent(this.shapedNames[it.surah - 1] || "");
-        } else if (this.mode === "juz") {
+            r.num.setContent(it.surah);
+            r.title.setContent(s.en + " " + it.surah + ":" + it.ayah);
+            r.sub.setContent(s.tr + " · verse " + it.ayah + " of " + s.count);
+            r.arabic.setContent(this.shapedNames[it.surah - 1] || "");
+        } else if (mode === "juz") {
             var start = this.surahs[it.surah - 1];
-            this.$.num.setContent(it.juz);
-            this.$.title.setContent("Juz " + it.juz);
-            this.$.sub.setContent("Starts at " + start.en + " " + it.surah + ":" + it.ayah);
-            this.$.arabic.setContent("");
+            r.num.setContent(it.juz);
+            r.title.setContent("Juz " + it.juz);
+            r.sub.setContent("Starts at " + start.en + " " + it.surah + ":" + it.ayah);
+            r.arabic.setContent("");
         } else {
-            this.$.num.setContent(it.n);
-            this.$.title.setContent(it.en + " – " + it.tr);
-            this.$.sub.setContent(it.type + " · " + it.count + " verses");
-            this.$.arabic.setContent(this.shapedNames[it.n - 1] || "");
+            r.num.setContent(it.n);
+            r.title.setContent(it.en + " – " + it.tr);
+            r.sub.setContent(it.type + " · " + it.count + " verses");
+            r.arabic.setContent(this.shapedNames[it.n - 1] || "");
         }
         return true;
     },
@@ -146,24 +189,32 @@ enyo.kind({
         // Hide it without removing it, so the row keeps its height and the buttons
         // beside it do not jump when switching between the tabs.
         this.$.searchBox.applyStyle("visibility", this.mode === "surah" ? "visible" : "hidden");
-        this.updateItems();
+        var modes = ["surah", "juz", "bookmarks"];
+        for (var i = 0; i < modes.length; i++) {
+            this.listFor(modes[i]).setShowing(modes[i] === this.mode);
+        }
+        this.updateNoBookmarks();
+        // A list measured its height while hidden (as 0); let it measure again. This
+        // redraws the visible rows and keeps the scroll position.
+        this.listFor(this.mode).resized();
     },
 
     searchChange: function () {
-        this.updateItems();
+        this.updateItems("surah", true);
     },
 
     rowTap: function (inSender, inEvent) {
-        var it = this.items[inEvent.rowIndex];
+        var mode = this.modeOf(inSender);
+        var it = this.items[mode][inEvent.rowIndex];
         if (!it) { return; }
-        if (this.mode === "bookmarks") {
+        if (mode === "bookmarks") {
             if (this.tappedRemove(inEvent.target)) {
                 QuranBookmarks.remove(it.surah, it.ayah);
-                this.updateItems();
+                this.updateItems("bookmarks");
             } else {
                 this.doOpenSurah(it.surah, it.ayah);
             }
-        } else if (this.mode === "juz") {
+        } else if (mode === "juz") {
             this.doOpenSurah(it.surah, it.ayah);
         } else {
             this.doOpenSurah(it.n, 1);
