@@ -10,6 +10,7 @@ enyo.depends(
     "source/QuranData.js",
     "source/JustType.js",
     "source/Home.js",
+    "source/MediaCard.js",
     "source/Reader.js",
     "source/App.js"
 );

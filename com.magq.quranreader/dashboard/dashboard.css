@@ -1,0 +1,81 @@
+/* The recitation card. The notification area is dark and a card is 320 x 52 px;
+   the sizes and colours follow webOS's own standard dashboard
+   (/usr/palm/frameworks/enyo/0.10/framework/source/palm/system/dashboard-window/). */
+body {
+    margin: 0;
+    background: transparent;
+    font-family: Prelude, "Prelude Medium", sans-serif;
+    color: #fff;
+}
+.qd-card {
+    height: 52px;
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    -webkit-box-align: center;
+    overflow: hidden;
+}
+.qd-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 8px 0 6px;
+}
+.qd-text {
+    -webkit-box-flex: 1;
+    width: 0;          /* share out only the space the buttons leave */
+    overflow: hidden;
+}
+.qd-title,
+.qd-sub {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.qd-title {
+    font-size: 16px;
+    font-weight: bold;
+}
+.qd-sub {
+    font-size: 14px;
+    color: #ccc;
+}
+/* Each button is a 44 x 52 tap area with the symbol centred in it. */
+.qd-button {
+    width: 44px;
+    height: 52px;
+    line-height: 52px;
+    text-align: center;
+    font-size: 0;      /* no stray space between the symbol's parts */
+}
+.qd-button:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+.qd-bar,
+.qd-gap,
+.qd-tri-left,
+.qd-tri-right {
+    display: inline-block;
+    vertical-align: middle;
+}
+.qd-bar {
+    width: 4px;
+    height: 16px;
+    background: #fff;
+}
+.qd-gap {
+    width: 4px;
+    height: 16px;
+}
+.qd-tri-right {
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 13px solid #fff;
+}
+.qd-tri-left {
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 13px solid #fff;
+}

@@ -42,12 +42,15 @@ enyo.kind({
         {name: "svcStatus", kind: "PalmService", service: "palm://com.magq.quranreader.service/", method: "getFetchStatus",
             onSuccess: "svcResponse", onFailure: "svcFailed"},
         {name: "svcRelease", kind: "PalmService", service: "palm://com.magq.quranreader.service/", method: "releaseVerse"},
-        {name: "svcClear", kind: "PalmService", service: "palm://com.magq.quranreader.service/", method: "clearCache"}
+        {name: "svcClear", kind: "PalmService", service: "palm://com.magq.quranreader.service/", method: "clearCache"},
+        // The "now playing" card in the notification area (source/MediaCard.js).
+        {name: "mediaCard", kind: "QuranMediaCard", onCommand: "mediaCommand"}
     ],
 
     create: function () {
         this.inherited(arguments);
         this.surah = 0;       // surah currently shown (0 = none yet)
+        this.surahName = "";  // its English name, for the recitation card
         this.topAyah = 1;     // verse at the top of the screen
         this.verseCount = 0;  // verses in the current surah (for "next verse"/range checks)
         this.textShown = false;   // true once the text is on screen
@@ -68,6 +71,8 @@ enyo.kind({
         this.pollTimer = null;
         this.serviceOk = true;   // false once a service call itself fails (not installed/registered): play remote URLs directly
         this.remoteSrc = false;  // true while the audio element is playing a remote URL (fallback), not a local file
+        this.playAfterLoad = false; // set by the recitation card's Previous/Next: recite the next surah once it is shown
+        this.autoPlayToken = 0;     // the load (this.token) that should start reciting when drawn
     },
 
     rendered: function () {
@@ -152,7 +157,11 @@ enyo.kind({
         var token = ++this.token;
         var file = QuranData.pad3(surah) + ".json";
 
-        this.stopPlayback();
+        // Previous/Next on the recitation card: keep the card open while the surah loads.
+        var autoPlay = this.playAfterLoad;
+        this.playAfterLoad = false;
+        this.autoPlayToken = autoPlay ? token : 0;
+        this.stopPlayback(autoPlay);
         this.resetVerseCache();
         this.surah = surah;
         this.topAyah = ayah;
@@ -175,6 +184,10 @@ enyo.kind({
             if (err) {
                 enyo.error("Could not load surah " + surah + ": " + err);
                 self.$.body.setContent('<div class="q-status">This surah could not be loaded.</div>');
+                if (self.autoPlayToken === token) {
+                    self.autoPlayToken = 0;
+                    self.$.mediaCard.hide();
+                }
                 return;
             }
             self.draw(results[0][surah - 1], results[1].bismillah, results[2], results[3], results[4] || null, ayah);
@@ -208,6 +221,7 @@ enyo.kind({
         var html = [];
 
         this.$.title.setContent(meta.n + ". " + meta.en);
+        this.surahName = meta.en;
         this.verseCount = arabic.length;
         if (meta.bismillah) {
             html.push('<div class="q-bismillah"' + font + '>' + this.escapeHtml(bismillah) + '</div>');
@@ -241,6 +255,11 @@ enyo.kind({
             self.scrollToAyah(ayah);
             self.textShown = true;
             self.doProgress(self.surah, ayah);
+            if (self.autoPlayToken && self.autoPlayToken === self.token) {
+                self.autoPlayToken = 0;
+                self.playSingle = false;
+                self.startPlayback(1);
+            }
         }, 100);
     },
 
@@ -337,7 +356,10 @@ enyo.kind({
         // Highlight and scroll a moment AFTER play() has been issued: the layout work is slow
         // on this device and used to sit in front of play(), adding to the gap between verses.
         setTimeout(function () {
-            if (token === self.playToken) { self.highlightAyah(ayah); }
+            if (token === self.playToken) {
+                self.highlightAyah(ayah);
+                self.updateMediaCard();
+            }
         }, 0);
     },
 
@@ -450,14 +472,52 @@ enyo.kind({
         this.$.playButton.setCaption("▶");
         this.audioNode.pause();
         this.cancelPauseTimer();
+        this.updateMediaCard();
     },
 
     // Pause and forget which verse we were on (used when leaving the surah
     // entirely -- Back, Previous/Next, or a script/translation/reciter change).
-    stopPlayback: function () {
+    // keepCard: leave the recitation card up (the card's own Previous/Next, which go
+    // straight on to reciting the other surah).
+    stopPlayback: function (keepCard) {
         this.pausePlayback();
         this.playAyah = 0;
         this.clearHighlight();
+        if (!keepCard) { this.updateMediaCard(); }
+    },
+
+    // ---- the recitation card in the notification area ----
+
+    // Shown while a verse is playing or paused (playAyah is set), gone once playback stops.
+    updateMediaCard: function () {
+        if (!this.playAyah) {
+            this.$.mediaCard.hide();
+            return;
+        }
+        this.$.mediaCard.show({
+            title: this.surahName + " " + this.surah + ":" + this.playAyah,
+            text: this.reciter.label,
+            playing: this.playing
+        });
+    },
+
+    // A button on the card (see MediaCard.js).
+    mediaCommand: function (inSender, cmd) {
+        if (cmd === "toggle") {
+            this.playTap();
+        } else if (cmd === "prev" || cmd === "next") {
+            // The previous/next SURAH, recited from its first verse.
+            var n = this.surah + (cmd === "prev" ? -1 : 1);
+            if (this.surah && n >= 1 && n <= 114) {
+                this.playAfterLoad = true;
+                this.open(n, 1);
+            }
+        } else if (cmd === "open") {
+            enyo.windows.activateWindow(window);
+        } else if (cmd === "closed") {
+            // Swiped away: the user is done listening.
+            this.stopPlayback();
+        }
     },
 
     cancelPauseTimer: function () {
