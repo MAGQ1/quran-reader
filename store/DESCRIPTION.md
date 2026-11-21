@@ -1,7 +1,7 @@
 # Quran Reader - App Museum II listing text (draft)
 
 **Name:** Quran Reader
-**Version:** 1.2.0
+**Version:** 1.3.0
 **Author / vendor:** MAGQ
 **Devices:** HP TouchPad (webOS 3.0.5)
 **Price:** Free, no ads
@@ -40,6 +40,9 @@ an internet connection.
 - Type a verse number into "Go to verse..." to jump straight there, or into
   "Play from verse..." to jump there and start listening.
 - Set how long a pause to leave between verses during continuous playback.
+- While a recitation plays, a card in the notification area shows the surah, verse
+  and reciter, with Previous surah, Play/Pause and Next surah buttons that also work
+  from the lock screen. Swipe it away to stop listening.
 - Recitation is fetched as you listen (and each verse is deleted afterwards), so
   it needs an internet connection (everything else
   in the app works fully offline).
@@ -81,6 +84,15 @@ an internet connection.
 All praise is due to Allah, the Most High.
 
 ## Changelog
+
+### 1.3.0
+
+- A recitation card in the notification area while you listen: Previous surah,
+  Play/Pause and Next surah buttons, also on the lock screen; swipe it away to stop
+- The Surahs, Juz and Bookmarks tabs each keep their own place (the Juz and
+  Bookmarks lists could show up empty after scrolling down the surah list)
+- The reader's toolbar now fits when the TouchPad is held upright, and the title
+  shows the surah's number and name only
 
 ### 1.2.0
 
