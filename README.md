@@ -1,6 +1,8 @@
-<img src="store/icon-256.png" alt="Quran Reader icon" width="96" align="right">
+<p align="center">
+  <img src="store/icon-256.png" alt="Quran Reader icon" width="128">
+</p>
 
-# Quran Reader
+<h1 align="center">Quran Reader</h1>
 
 A free Quran reader for the **HP TouchPad** (Palm/HP webOS 3.0.5 and later, including webOS CE 3.1.0). It shows the Arabic with an English translation, and can recite verse by verse.
 
